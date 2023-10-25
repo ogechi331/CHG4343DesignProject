@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/CHG4343Project.iml" filepath="$PROJECT_DIR$/CHG4343Project.iml" />
+      <module fileurl="file://$PROJECT_DIR$/EulerSolver/EulerSolver.iml" filepath="$PROJECT_DIR$/EulerSolver/EulerSolver.iml" />
     </modules>
   </component>
 </project>
