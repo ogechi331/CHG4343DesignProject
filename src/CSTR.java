@@ -5,4 +5,6 @@ public interface CSTR {
     void simulateTransient();
     void respondToSetPointChange();
     void respondToInputChange();
+
+
 }
