@@ -1,20 +1,28 @@
 public abstract class PIDController {
 
-    private double startTime;
-    private double endTime;
-    private double timeStep;
+    //TODO still needs a interface to implement, not exactly sure how to do this since it will want all functions in the child class too then
+    //TODO still needs to be changed to throw exceptions and add javadoc to the class
+    private double startTime; //normally 0
+    private double endTime; //greater than startTime
+    private double timeStep; //needs to be big enough to make at least one time step between start and end time
     private double controllerGain; //K_C
 
     private double integratingTimeConstant; //𝛕_I
 
     private double derivativeTimeConstant;//𝛕_D
-    private double numberOfSteps;
+    private double numberOfSteps; //calculated from above not given directly
 
     //Constructor
     public PIDController(double startTime, double endTime, double timeStep, double controllerGain, double integratingTimeConstant, double derivativeTimeConstant) {
 
-        if (endTime<startTime) System.exit(0);
-        if (timeStep> (startTime-endTime)) System.exit(0);
+        if (endTime<startTime) {
+            System.out.println("Error end time must be larger than start time");
+            System.exit(0);
+        }
+        if (timeStep>(endTime-startTime)) {
+            System.out.println("Error time step is too large for time range");
+            System.exit(0);
+        }
 
         this.startTime = startTime;
         this.endTime = endTime;
@@ -22,12 +30,15 @@ public abstract class PIDController {
         this.controllerGain = controllerGain;
         this.integratingTimeConstant = integratingTimeConstant;
         this.derivativeTimeConstant = derivativeTimeConstant;
-        this.numberOfSteps = (int)Math.ceil((this.endTime-this.startTime)/this.timeStep);
+        this.numberOfSteps = (int)Math.ceil((this.endTime-this.startTime)/this.timeStep)+1;
     }
 
     //Copy constructor
     public PIDController(PIDController source) {
-        if (source==null) System.exit(0);
+        if (source==null) {
+            System.out.println("Error copy of null PIDController object");
+            System.exit(0);
+        }
         this.startTime=source.startTime;
         this.endTime=source.endTime;
         this.timeStep=source.timeStep;
@@ -39,17 +50,6 @@ public abstract class PIDController {
 
     //Clone method
     public abstract PIDController clone();
-
-    /*public double[] getTimeInformation() {
-
-        double[] timeInformation = new double[4];
-        timeInformation[0] = this.startTime;
-        timeInformation[1] = this.endTime;
-        timeInformation[2] = this.timeStep;
-        timeInformation[3] = this.numberOfSteps;
-
-        return timeInformation;
-    } */
 
     public double getStartTime() {
         return startTime;
@@ -67,16 +67,24 @@ public abstract class PIDController {
         return numberOfSteps;
     }
 
-    public boolean setTimeInformation(double[] timeInformation) {
-        if (timeInformation==null) return false;
-        if (timeInformation.length!=3) return false;
+    public boolean setStartTime(double startTime) {
+        if (startTime < this.endTime) return false;
+        this.startTime= startTime;
+        this.numberOfSteps = (int)Math.ceil((this.endTime-this.startTime)/this.timeStep)+1;
+        return true;
+    }
 
-        this.startTime = timeInformation[0];
-        this.endTime = timeInformation[1];
-        this.timeStep = timeInformation[2];
-        this.numberOfSteps = (int)Math.ceil((timeInformation[0]-timeInformation[1])/timeInformation[2]);
+    public boolean setEndTime(double endTime) {
+        if (this.startTime < endTime) return false;
+        this.endTime= endTime;
+        this.numberOfSteps = (int)Math.ceil((this.endTime-this.startTime)/this.timeStep)+1;
+        return true;
+    }
 
-
+    public boolean setTimeStep (double timeStep) {
+        if (((this.endTime-this.startTime)/timeStep)<1) return false;
+        this.timeStep = timeStep;
+        this.numberOfSteps = (int)Math.ceil((this.endTime-this.startTime)/this.timeStep)+1;
         return true;
     }
 
@@ -122,21 +130,27 @@ public abstract class PIDController {
         return true;
     }
 
-    //TODO Note to self for Dylan, plan to split this into P, I, and D parts
-    public double simulateTimeStep(double time, double setPoint, double pastError, double currentValue, double pastIntegralPart, double pastValue, double pastControlState) {
-
-        double nextControlState;
-        double proportionalPart, integralPart, derivativePart;
-        double error;
-
-        error = setPoint-currentValue;
-
-        proportionalPart = this.controllerGain*(error);
-        integralPart = pastIntegralPart + ((this.controllerGain/this.integratingTimeConstant)*error*this.timeStep);
-        derivativePart = -this.controllerGain*this.derivativeTimeConstant*((currentValue-pastValue)/(this.timeStep));
-
-        nextControlState = pastControlState + proportionalPart + integralPart + derivativePart;
-        return nextControlState;
+    //used for all i steps
+    public double simulateProportionalStep(double error) {
+        return this.controllerGain*error;
     }
+
+    //used for i>0 steps
+    public double simulateIntegralStep(double error, double pastIntegralPart) {
+        return (pastIntegralPart+((this.controllerGain/this.integratingTimeConstant)*error*this.timeStep));
+    }
+    //used for i=0 steps
+    public double simulateIntegralStep(double error) {
+        return ((this.controllerGain/this.integratingTimeConstant)*error*this.timeStep);
+    }
+    //use for i>0
+    public double simulateDerivativeStep(double currentValue, double pastValue) {
+        return (-this.controllerGain*this.derivativeTimeConstant*((currentValue-pastValue)/this.timeStep));
+    }
+    //use for i=0
+    public double simulateDerivativeStep(double currentValue) {
+        return (-this.controllerGain*this.derivativeTimeConstant*((currentValue)/this.timeStep));
+    }
+
 
 } //end of class

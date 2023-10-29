@@ -1,6 +1,6 @@
 public class CSTRControllerPID extends PIDController {
 
-
+    //TODO still needs to be changed to throw exceptions and add javadoc to the class
 
     //Constructor
     public CSTRControllerPID(double startTime, double endTime, double timeStep, double controllerGain, double integratingTimeConstant, double derivativeTimeConstant) {
@@ -16,45 +16,58 @@ public class CSTRControllerPID extends PIDController {
         return new CSTRControllerPID(this);
     }
 
-    //TODO Note to self for Dylan this section is not finished yet
-    public void stimulateProcess (double initialConcentration, double setPoint) { //for test case 2 initial is 0.2 and setPoint is 1.2
+    //PID loop simulator
+    //TODO still needs to be generalized more and interact with our other classes
+    public double[][] stimulateProcess (double initialConcentrationA, double initialConcentrationB, double setPoint, double initialFlowRate, double inletConcentration) { //for test case 2 initial is 0.2 and setPoint is 1.2
 
+        double[][] simulation = new double[11][(int)super.getNumberOfSteps()];
+        //[0] is time
+        //[1] is CA
+        //[2] is CB
+        //[3] is Error
+        //[4] is P part
+        //[5] is I part
+        //[6] is D part
+        //[7] is controller
+        //[8] is flow rate
+        //[9] is new CA
+        //[10] is new CB
 
-
-        double[][] simulation = new double[5][(int)super.getNumberOfSteps()];
-        //[0] is times
-        //[1] is set point concentration at each time
-        //[2] is exit concentration at each time
-        //[3] is error in concentration at each time
-        //[5] is for the resulting control state at each time
-        //[5] is new concentration for i+1 time
-
-        //fill in times for process simulation
+        //loop for process simulation
         for (int i = 0; i<(int)super.getNumberOfSteps(); i++) {
-
-            double pastIntegralPart = 0;
 
             if (i==0) {
                 simulation[0][0] = super.getStartTime();
-                simulation[1][0] = setPoint;
-                simulation[2][0] = initialConcentration;
-                simulation[3][0] = setPoint-initialConcentration;
-            }
+                simulation[1][0] = initialConcentrationA;
+                simulation[2][0] = initialConcentrationB;
+                simulation[3][0] = setPoint-simulation[2][0];
+                simulation[4][0] = super.simulateProportionalStep(simulation[3][0]);
+                simulation[5][0] = super.simulateIntegralStep(simulation[3][0]);
+                simulation[6][0] = super.simulateDerivativeStep(simulation[2][0]);
+                simulation[7][0] = simulation[4][0] + simulation[5][0] + simulation[6][0];
+                simulation[8][0] = initialFlowRate-simulation[7][0];
+                //TODO change the next line to use CSTR object properties
+                simulation[9][0] = simulation[1][0]+(super.getTimeStep()/1)*(simulation[8][0]*inletConcentration-simulation[8][0]*simulation[1][0]-0.2*1*simulation[1][0]);
+                //TODO change the next line to use CSTR object properties
+                simulation[10][0] = simulation[2][0]+(super.getTimeStep()/1)*(0.2*1*simulation[1][0]-simulation[8][0]*simulation[2][0]);
+            } //end of i=0 loop
             if (i>0) {
-                simulation[0][i] = simulation[0][i-1] + super.getTimeStep();
-                simulation[1][i] = setPoint;
-                simulation[2][i] = simulation[5][i-1];
-                simulation[3][i] = setPoint - simulation[5][i-1];
-                simulation[4][i] = super.simulateTimeStep(simulation[0][i], simulation[1][i], simulation[3][i-1], simulation[5][i-1], pastIntegralPart, simulation[2][i-1],simulation[4][i-1]);
-                double flowRate = simulation[4][i];
-                if (flowRate < 0) flowRate = 0;
-                simulation[5][i] = (flowRate*simulation[2][i-1])/(flowRate+(0.2*1)); //hard coded currently k and V for reactor
-            }
+                simulation[0][i] = simulation[0][i-1]+super.getTimeStep();
+                simulation[1][i] = simulation[9][i-1];
+                simulation[2][i] = simulation[10][i-1];
+                simulation[3][i] = setPoint-simulation[2][i];
+                simulation[4][i] = super.simulateProportionalStep(simulation[3][i]);
+                simulation[5][i] = super.simulateIntegralStep(simulation[3][i], simulation[5][i-1]);
+                simulation[6][i] = super.simulateDerivativeStep(simulation[2][i], simulation[2][i-1]);
+                simulation[7][i] = simulation[4][i] + simulation[5][i] + simulation[6][i];
+                simulation[8][i] = initialFlowRate-simulation[7][i];
+                //TODO change the next line to use CSTR object properties
+                simulation[9][i] = simulation[1][i]+(super.getTimeStep()/1)*(simulation[8][i]*inletConcentration-simulation[8][i]*simulation[1][i]-0.2*1*simulation[1][i]);
+                //TODO change the next line to use CSTR object properties
+                simulation[10][i] = simulation[2][i]+(super.getTimeStep()/1)*(0.2*1*simulation[1][i]-simulation[8][i]*simulation[2][i]);
+            } //end of i>0 loop
         }
-
-
-
+        return simulation;
     }
 
-
-}
+} // end of class
