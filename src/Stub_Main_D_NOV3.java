@@ -8,11 +8,12 @@ public class Stub_Main_D_NOV3 {
         //passing reaction equation and rate constant
         Reaction reaction = new Reaction("A->B", 0.2);
         double[] initialConcentrations = {0.04, 0.16}; //steady state before step change
+        double[] inletConcentrations = {1.2, 0}; //step change
         //giving reactor volume, initial flow rate, reaction, initial concentrations, and new inlet concentration
-        CSTRReactor CSTR = new CSTRReactor(1, 0.05, reaction, initialConcentrations, 1.2);
+        CSTRReactor CSTR = new CSTRReactor(1, 0.05, reaction, inletConcentrations, initialConcentrations);
         double numberOfSteps = (int)Math.ceil((10-0)/0.1)+1;
         double[][] results = new double[11][(int)numberOfSteps];
-        results = controlCSTR.stimulateProcess(0.040, 0.160, 0.16, 0.05, 1.2, CSTR);
+        results = controlCSTR.stimulateProcess(0.040, 0.160, 0.16, 0.05, CSTR);
 
         System.out.println("The reactor results are as follows");
 
@@ -23,4 +24,3 @@ public class Stub_Main_D_NOV3 {
 
         }
     }
-}

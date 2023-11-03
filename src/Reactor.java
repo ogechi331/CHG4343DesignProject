@@ -1,46 +1,146 @@
-import java.util.ArrayList;
-import java.util.Collections;
 public abstract class Reactor {
-    double setPoint;
-    double controlledVariable;
-    double commandedVariable;
-    double[] inFlowConcentrations;
-    double[] concentrations;
-    Reaction reaction;
-    ArrayList<Species> species = new ArrayList<Species>();//not given
-    double timeStep;
 
-    public Reactor(double setPoint, double controlledVariable, double commandedVariable, double[] inFlowConcentrations,
-                   double[] concentrations, Reaction reaction, double timeStep) {
-        this.setPoint = setPoint;
-        this.commandedVariable = commandedVariable;
+    private double volume;
+    private Reaction reaction;
+    private double[] inletConcentrations;
+
+    private double[] initialConcentrations;
+
+    private double initialFlow;
+
+    public Reactor(double volume, double initialFlow, Reaction reaction, double[] initialConcentrations, double[] inletConcentrations) {
+
         if(reaction==null){
-            System.out.println("a list of species is needed to initialize the reactor");
-            System.out(0);
+            System.out.println("A reaction is needed to initialize the reactor");
+            System.exit(0);
         }
+
+        this.reaction= reaction.clone();
+
+        if (volume<0) {
+            System.out.println("Reactor volume must not be negative");
+            System.exit(0);
+        }
+
+        this.volume=volume;
+
+        if (initialFlow<0) {
+            System.out.println("Reactor initial flow must not be negative");
+            System.exit(0);
+        }
+        this.initialFlow=initialFlow;
+
+        //TODO add checks for these
+
+        for(int i=0;i<initialConcentrations.length; i++){
+            this.initialConcentrations[i] = initialConcentrations[i];
+        }
+        for(int i=0;i<inletConcentrations.length; i++){
+            this.inletConcentrations[i] = inletConcentrations[i];
+        }
+
+    }
+
+    public Reactor(Reactor source) {
+        if(source==null){
+            System.out.println("Null object given to copy constructor");
+            System.exit(0);
+        }
+
+        this.reaction= reaction.clone();
+        this.volume=volume;
+        this.initialFlow=initialFlow;
+
+        for(int i=0;i<initialConcentrations.length; i++){
+            this.initialConcentrations[i] = initialConcentrations[i];
+        }
+        for(int i=0;i<inletConcentrations.length; i++){
+            this.inletConcentrations[i] = inletConcentrations[i];
+        }
+    }
+
+    public abstract Reactor clone();
+
+    public double getVolume() {
+        return this.volume;
+    }
+
+    public boolean setVolume(double volume) {
+        if (volume<0) return false;
+        this.volume = volume;
+        return true;
+    }
+
+    public Reaction getReaction() {
+        return this.reaction.clone();
+    }
+
+    public boolean setReaction(Reaction reaction) {
+        if (reaction==null) return false;
         this.reaction = reaction.clone();
-        Collections.addAll(species,reaction.getReactants());
-        Collections.addAll(species,reaction.getProducts());
-
-        if (inFlowConcentrations==null) {
-            this.inFlowConcentrations=new double[species.length];//says that it should default to 0?
-        }
-        this.inFlowConcentrations = inFlowConcentrations.clone();
-        if (concentrations==null){
-            this.concentrations=new double[species.length];//says that it should default to 0?
-        }
-        this.reaction = reaction;
-        this.timeStep = timeStep;
+        return true;
     }
+
+    public double getInitialFlow() {
+        return this.initialFlow;
+    }
+
+    public boolean setInitialFlow(double initialFlow) {
+        if (initialFlow<0) return false;
+        this.initialFlow = initialFlow;
+        return true;
+    }
+
+    public double[] getInletConcentrations() {
+        double[] inletConcentrations = new double[this.inletConcentrations.length];
+        for (int i=0; i<this.inletConcentrations.length; i++) {
+            inletConcentrations[i] = this.inletConcentrations[i];
+        }
+        return inletConcentrations;
+    }
+
+    public boolean setInletConcentrations(double[] inletConcentrations) {
+        this.inletConcentrations = inletConcentrations;
+        return true;
+    }
+
+    public double[] getInitialConcentrations() {
+        double[] initialConcentrations = new double[this.initialConcentrations.length];
+        for (int i=0; i<this.initialConcentrations.length; i++) {
+            initialConcentrations[i] = this.initialConcentrations[i];
+        }
+        return initialConcentrations;
+    }
+
+    public boolean setInitialConcentrations(double[] initialConcentrations) {
+        this.initialConcentrations = initialConcentrations;
+        return true;
+    }
+
     public boolean equals(Object comparator){
-        if comparator==null return false;
-        else return (this.getClass()==comparator.getClass());
+        if (comparator==null) return false;
+        if (comparator.getClass()!=this.getClass()) return false;
+
+        Reactor reactorComparator = (Reactor)comparator;
+
+        if (reactorComparator.volume!=this.volume) return false;
+        if(!(reactorComparator.reaction.equals(this.reaction))) return false;
+        if (reactorComparator.inletConcentrations.length!=this.inletConcentrations.length) return false;
+        if (reactorComparator.initialConcentrations.length!=this.initialConcentrations.length) return false;
+
+        for (int i = 0; i<this.inletConcentrations.length; i++) {
+            if (reactorComparator.inletConcentrations[i]!=this.inletConcentrations[i]) return false;
+        }
+
+        for (int i = 0; i<this.initialConcentrations.length; i++) {
+            if (reactorComparator.initialConcentrations[i]!=this.initialConcentrations[i]) return false;
+        }
+
+        if (reactorComparator.initialFlow != this.initialFlow) return false;
+
+        return true;
+
     }
 
-    public void updateDisturbanceVariable(double disturbanceVariable){
-    }
-
-    public double simulateStep(double commandedVariable){
-        return controlledVariable;
-    }
+    public abstract double simulateStep(double timeStep,double flowRate, double[] currentConcentrations, int currentSpeciesNumber);
 }
