@@ -17,8 +17,7 @@ public class CSTRControllerPID extends PIDController {
     }
 
     //PID loop simulator
-    //TODO still needs to be generalized more and interact with our other classes
-    public double[][] stimulateProcess (double initialConcentrationA, double initialConcentrationB, double setPoint, double initialFlowRate, double inletConcentration) { //for test case 2 initial is 0.2 and setPoint is 1.2
+    public double[][] stimulateProcess (double initialConcentrationA, double initialConcentrationB, double setPoint, double initialFlowRate, double inletConcentration, CSTRReactor CSTR) { //for test case 2 initial is 0.2 and setPoint is 1.2
 
         double[][] simulation = new double[11][(int)super.getNumberOfSteps()];
         //[0] is time
@@ -46,10 +45,11 @@ public class CSTRControllerPID extends PIDController {
                 simulation[6][0] = super.simulateDerivativeStep(simulation[2][0]);
                 simulation[7][0] = simulation[4][0] + simulation[5][0] + simulation[6][0];
                 simulation[8][0] = initialFlowRate-simulation[7][0];
-                //TODO change the next line to use CSTR object properties
-                simulation[9][0] = simulation[1][0]+(super.getTimeStep()/1)*(simulation[8][0]*inletConcentration-simulation[8][0]*simulation[1][0]-0.2*1*simulation[1][0]);
-                //TODO change the next line to use CSTR object properties
-                simulation[10][0] = simulation[2][0]+(super.getTimeStep()/1)*(0.2*1*simulation[1][0]-simulation[8][0]*simulation[2][0]);
+                //time step, current concentration, flow rate, reactant to simulate
+                simulation[9][0] = CSTR.simulateStep(super.getTimeStep(), simulation[1][0],simulation[8][0], 0);
+                //simulation[9][0] = simulation[1][0]+(super.getTimeStep()/1)*(simulation[8][0]*inletConcentration-simulation[8][0]*simulation[1][0]-0.2*1*simulation[1][0]);
+                //simulation[10][0] = simulation[2][0]+(super.getTimeStep()/1)*(0.2*1*simulation[1][0]-simulation[8][0]*simulation[2][0]);
+                simulation[10][0] = CSTR.simulateStep(super.getTimeStep(), simulation[2][0],simulation[8][0], 1);
             } //end of i=0 loop
             if (i>0) {
                 simulation[0][i] = simulation[0][i-1]+super.getTimeStep();
@@ -61,10 +61,11 @@ public class CSTRControllerPID extends PIDController {
                 simulation[6][i] = super.simulateDerivativeStep(simulation[2][i], simulation[2][i-1]);
                 simulation[7][i] = simulation[4][i] + simulation[5][i] + simulation[6][i];
                 simulation[8][i] = initialFlowRate-simulation[7][i];
-                //TODO change the next line to use CSTR object properties
-                simulation[9][i] = simulation[1][i]+(super.getTimeStep()/1)*(simulation[8][i]*inletConcentration-simulation[8][i]*simulation[1][i]-0.2*1*simulation[1][i]);
-                //TODO change the next line to use CSTR object properties
-                simulation[10][i] = simulation[2][i]+(super.getTimeStep()/1)*(0.2*1*simulation[1][i]-simulation[8][i]*simulation[2][i]);
+                //time step, current concentration, flow rate, reactant to simulate
+                //simulation[9][i] = simulation[1][i]+(super.getTimeStep()/1)*(simulation[8][i]*inletConcentration-simulation[8][i]*simulation[1][i]-0.2*1*simulation[1][i]);
+                simulation[9][i] = CSTR.simulateStep(super.getTimeStep(), simulation[1][i],simulation[8][i], 0);
+                //simulation[10][i] = simulation[2][i]+(super.getTimeStep()/1)*(0.2*1*simulation[1][i]-simulation[8][i]*simulation[2][i]);
+                simulation[10][i] = CSTR.simulateStep(super.getTimeStep(), simulation[2][i],simulation[8][i], 1);
             } //end of i>0 loop
         }
         return simulation;

@@ -2,7 +2,7 @@ public class Stub_Main_D_OCT29 {
     //stub code driver class for Dylan to test coded PID classes October 29th, 2023
     public static void main(String[] args) {
 
-        CSTRControllerPID CSTR = new CSTRControllerPID(0, 10, 0.1, 2.5, 0.05, 2);
+        /*CSTRControllerPID CSTR = new CSTRControllerPID(0, 10, 0.1, 2.5, 0.05, 2);
         double numberOfSteps = (int)Math.ceil((10-0)/0.1)+1;
         double[][] results = new double[11][(int)numberOfSteps];
 
@@ -14,5 +14,7 @@ public class Stub_Main_D_OCT29 {
         for (int i =0; i< (int)numberOfSteps; i++) {
             System.out.printf("Time %1.1f CA %1.3f CB %1.3f \n", results[0][i], results[1][i], results[2][i]);
         }
+
+         */
     }
 }
