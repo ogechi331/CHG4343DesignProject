@@ -19,15 +19,22 @@ public class CSTRReactor extends Reactor {
 
     public double simulateStep(double timeStep,double flowRate, double[] currentConcentrations, int currentSpeciesNumber){
         double reactionRate;
-        double updatedConcentration;
+        //double updatedConcentration;
         double[] inletConcentrations = new double[super.getInletConcentrations().length];
+
+        double changeRate;
+
         inletConcentrations = super.getInletConcentrations();
+
         reactionRate=super.getReaction().calculateReactionRate(currentConcentrations,currentSpeciesNumber);
 
-        updatedConcentration=currentConcentrations[currentSpeciesNumber]+timeStep*((flowRate/super.getVolume())*
-                inletConcentrations[currentSpeciesNumber]-currentConcentrations[currentSpeciesNumber]*flowRate/super.getVolume()+
-                currentConcentrations[currentSpeciesNumber]*reactionRate);
+        changeRate = flowRate*inletConcentrations[currentSpeciesNumber];
+        changeRate = changeRate - (flowRate*currentConcentrations[currentSpeciesNumber]);
+        changeRate = changeRate + (reactionRate*super.getVolume());
 
-        return updatedConcentration;
+        changeRate = ((1/super.getVolume())*changeRate);
+
+        return changeRate;
     }
+
 }

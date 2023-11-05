@@ -32,6 +32,9 @@ public abstract class Reactor {
 
         //TODO add checks for these
 
+        this.inletConcentrations = new double[inletConcentrations.length];
+        this.initialConcentrations = new double[initialConcentrations.length];
+
         for(int i=0;i<initialConcentrations.length; i++){
             this.initialConcentrations[i] = initialConcentrations[i];
         }
@@ -48,14 +51,14 @@ public abstract class Reactor {
         }
 
         this.reaction= reaction.clone();
-        this.volume=volume;
-        this.initialFlow=initialFlow;
+        this.volume=source.volume;
+        this.initialFlow=source.initialFlow;
 
         for(int i=0;i<initialConcentrations.length; i++){
-            this.initialConcentrations[i] = initialConcentrations[i];
+            this.initialConcentrations[i] = source.initialConcentrations[i];
         }
         for(int i=0;i<inletConcentrations.length; i++){
-            this.inletConcentrations[i] = inletConcentrations[i];
+            this.inletConcentrations[i] = source.inletConcentrations[i];
         }
     }
 

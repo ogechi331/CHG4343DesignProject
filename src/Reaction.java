@@ -121,17 +121,22 @@ public class Reaction implements Cloneable{
      * @return reaction rate
      * @throws NullPointerException if the reactants array or concentration array is null
      */
-    public double calculateReactionRate(double[] concentrations) throws NullPointerException{
+    public double calculateReactionRate(double[] concentrations, int currentSpecies) throws NullPointerException{
         if(reactants == null || concentrations == null){
             throw new NullPointerException("Reactants and concentrations cannot be null");
         }
         double prod = 1;
 
-        for(int i = 0; i < reactants.length; i++){
-            prod *= Math.pow(concentrations[i],reactants[i].getCoefficient());
+        for(int i = 0; i < reactants.length; i++) {
+            prod *= Math.pow(concentrations[i], reactants[i].getCoefficient());
+        }
+
+        //adding check to determine if consumption or generation
+
+        if ((currentSpecies+1)<=this.reactants.length) {
+            prod=prod*(-1);
         }
         return k*prod;
-
     }
     public void updateCompositions(){//TBD
         throw new UnsupportedOperationException();
