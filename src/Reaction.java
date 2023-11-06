@@ -1,3 +1,8 @@
+/** Reaction class
+ * @author Ogechi
+ * @author Dylan
+ * @version 1.1
+ */
 public class Reaction implements Cloneable{
 
     private Species[] reactants;
@@ -5,11 +10,22 @@ public class Reaction implements Cloneable{
     private Species limitingReactant;
     private double k;
 
-
+    /**
+     *
+     * @param rEquation
+     * @param k
+     * @author Ogechi
+     */
     public Reaction(String rEquation, double k){
         parseReactionEquation(rEquation);
         this.k = k;
     }
+
+    /**
+     *
+     * @param other
+     * @author Ogechi
+     */
     public Reaction(Reaction other){
         this.reactants = new Species[other.reactants.length];
         this.products = new Species[other.products.length];
@@ -23,31 +39,66 @@ public class Reaction implements Cloneable{
         this.k = other.k;
     }
 
+    /**
+     *
+     * @return
+     * @author Ogechi
+     */
     @Override
     protected Reaction clone(){
         return new Reaction(this);
     }
 
+    /**
+     *
+     * @return
+     * @author Ogechi
+     */
     public double getK() {
         return k;
     }
 
+    /**
+     *
+     * @return
+     * @author Ogechi
+     */
     public Species getLimitingReactant() {
         return limitingReactant;
     }
 
+    /**
+     *
+     * @return
+     * @author Ogechi
+     */
     public Species[] getProducts() {
         return products.clone();
     }
 
+    /**
+     *
+     * @param k
+     * @author Ogechi
+     */
     public void setK(double k) {
         this.k = k;
     }
 
+    /**
+     *
+     * @param limitingReactant
+     * @author Ogechi
+     */
     public void setLimitingReactant(Species limitingReactant) {
         this.limitingReactant = limitingReactant;
     }
 
+    /**
+     *
+     * @param products
+     * @author Ogechi
+     */
     public void setProducts(Species[] products) {
         this.products = new Species[products.length];
         for(int i = 0; i < products.length; i++) {
@@ -55,6 +106,11 @@ public class Reaction implements Cloneable{
         }
     }
 
+    /**
+     *
+     * @param reactants
+     * @author Ogechi
+     */
     public void setReactants(Species[] reactants) {
         this.reactants = new Species[reactants.length];
         for(int i = 0; i < reactants.length; i++) {
@@ -62,6 +118,11 @@ public class Reaction implements Cloneable{
         }
     }
 
+    /**
+     *
+     * @param concentrations
+     * @author Ogechi
+     */
     private void calculateLimitingReactant(double[] concentrations){
         if (reactants == null || products == null){
             throw new NullPointerException("Reactants/Products cannot be null");
@@ -81,6 +142,11 @@ public class Reaction implements Cloneable{
         }
     }
 
+    /**
+     *
+     * @param rEquation
+     * @author Ogechi
+     */
     private void parseReactionEquation(String rEquation) {
         String[] reactionParts = rEquation.split("->");
 
@@ -93,6 +159,13 @@ public class Reaction implements Cloneable{
         reactants = parseSpeciesList(reactantParts);
         products = parseSpeciesList(productParts);
     }
+
+    /**
+     *
+     * @param speciesList
+     * @return
+     * @author Ogechi
+     */
     private Species[] parseSpeciesList(String speciesList){
         String[] speciesStrings = speciesList.split("\\+");
         Species[] species = new  Species[speciesStrings.length];
@@ -103,6 +176,12 @@ public class Reaction implements Cloneable{
         return species;
     }
 
+    /**
+     *
+     * @param speciesString
+     * @return
+     * @author Ogechi
+     */
     private Species parseSpecies(String speciesString) {
         speciesString = speciesString.trim();
         int coefficient = 1;
@@ -120,6 +199,8 @@ public class Reaction implements Cloneable{
      * @param concentrations  array of concentrations
      * @return reaction rate
      * @throws NullPointerException if the reactants array or concentration array is null
+     * @author Ogechi
+     * @author Dylan
      */
     public double calculateReactionRate(double[] concentrations, int currentSpecies) throws NullPointerException{
         if(reactants == null || concentrations == null){
@@ -131,13 +212,17 @@ public class Reaction implements Cloneable{
             prod *= Math.pow(concentrations[i], reactants[i].getCoefficient());
         }
 
-        //adding check to determine if consumption or generation
-
+        //added check to determine if consumption or generation
         if ((currentSpecies+1)<=this.reactants.length) {
             prod=prod*(-1);
         }
         return k*prod;
     }
+
+    /**
+     *
+     * @author Ogechi
+     */
     public void updateCompositions(){//TBD
         throw new UnsupportedOperationException();
     }

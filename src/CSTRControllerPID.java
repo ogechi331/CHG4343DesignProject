@@ -1,23 +1,83 @@
+/** Concrete class for the PID control of a CSTR reactor for A->B
+ * @author Dylan
+ * @version 2.0
+ */
 public class CSTRControllerPID extends PIDController {
 
-    //TODO still needs to be changed to throw exceptions and add javadoc to the class
+    //TODO still needs to be changed to throw exceptions for the constructors
+    //TODO add equals method
 
-    //Constructor
+    /** Constructor for control loop object
+     *
+     * @param startTime start time for simulation, normally 0
+     * @param endTime end time for simulation (must be after start time)
+     * @param timeStep time step for simulation (must be small enough for at least 1 step)
+     * @param controllerGain controller gain
+     * @param integratingTimeConstant controller integrating time constant
+     * @param derivativeTimeConstant controller derivative time constant
+     * @author Dylan
+     */
     public CSTRControllerPID(double startTime, double endTime, double timeStep, double controllerGain, double integratingTimeConstant, double derivativeTimeConstant) {
         super(startTime, endTime, timeStep, controllerGain, integratingTimeConstant, derivativeTimeConstant);
     }
 
-    //Copy constructor
+    /** Copy constructor for the control loop object
+     *
+     * @param source a control loop object to copy
+     * @author Dylan
+     */
     public CSTRControllerPID (CSTRControllerPID source) {
         super(source);
     }
 
+    /** Clone method for the control loop object
+     *
+     * @return a copy of the object using the copy constructor
+     * @author Dylan
+     */
     public CSTRControllerPID clone() {
         return new CSTRControllerPID(this);
     }
 
-    //PID loop simulator
-    public double[][] stimulateProcess (double initialConcentrationA, double initialConcentrationB, double setPoint, double initialFlowRate, CSTRReactor CSTR) { //for test case 2 initial is 0.2 and setPoint is 1.2
+    /** Equals method
+     *
+     * @param comparator object to compare to current object
+     * @return true if all instant variables and class type are equal, otherwise returns false
+     * @author Dylan
+     */
+    public boolean equals(Object comparator){
+        if (!(super.equals(comparator))) return false;
+        return true;
+    }
+
+    /** Method to simulate the CSTR control over time for the specific case of A->B
+     *
+     * @param initialConcentrationA the starting concentration of A in the reactor at steady state
+     * @param initialConcentrationB the starting concentration of B in the reactorat steady state
+     * @param setPoint the set point concentration of B desired
+     * @param initialFlowRate the initial flow rate for the steady state operation before the step chnage
+     * @param CSTR the CSTR object that represents the reactor is use
+     * @return a 2D array of simulation results which are as follows:
+     * [0] is time
+     * [1] is CA
+     * [2] is CB
+     * [3] is Error
+     * [4] is P part
+     * [5] is I part
+     * [6] is D part
+     * [7] is controller
+     * [8] is flow rate
+     * [9] is new CA
+     * [10] is new CB
+     * [11] is the ideal step size calculation from RK45
+     * @throws NullPointerException if the CSTR object is null
+     * @author Dylan
+     */
+    public double[][] stimulateProcess (double initialConcentrationA, double initialConcentrationB, double setPoint, double initialFlowRate, CSTRReactor CSTR) throws NullPointerException { //for test case 2 initial is 0.2 and setPoint is 1.2
+
+        if(CSTR == null){
+            throw new NullPointerException("CSTR reactor object cannot be null");
+        }
 
         double[][] simulation = new double[12][(int)super.getNumberOfSteps()];
         double[] RKResults; //temp array to hold double return value
@@ -97,8 +157,28 @@ public class CSTRControllerPID extends PIDController {
         return simulation;
     }
 
+    /**
+     * Uses Euler's method to solve for the new concentration of a species after a time step
+     *
+     * @param wholeTimeStep the time step for Ci to new Ci
+     * @param flowRate the flow rate for the CSTR at the given time step
+     * @param currentConcentrations an array of the the current concentrations in the reactor of all species
+     * @param currentSpeciesNumber the species i to calculate the new concentration of
+     * @param CSTR the CSTR object that represents the reactor is use
+     * @return gives the new concentration at t + timestep
+     * @throws NullPointerException if the CSTR object or array of concentrations is null
+     * @deprecated code should now use an RK45 method
+     * @author Dylan
+     */
 
-    public double eulersMethod (double wholeTimeStep, double flowRate, double[] currentConcentrations, int currentSpeciesNumber, CSTRReactor CSTR) {
+    public double eulersMethod (double wholeTimeStep, double flowRate, double[] currentConcentrations, int currentSpeciesNumber, CSTRReactor CSTR) throws NullPointerException {
+
+        if(CSTR == null){
+            throw new NullPointerException("CSTR reactor object cannot be null");
+        }
+        if(currentConcentrations == null){
+            throw new NullPointerException("Current concentrations array cannot be null");
+        }
 
         double answer;
 
@@ -108,8 +188,26 @@ public class CSTRControllerPID extends PIDController {
 
     }
 
+    /** Uses RK45 method to solve for the new concentrations of A and B after a time step
+     *
+     * @param wholeTimeStep the time step for Ci to new Ci
+     * @param flowRate the flow rate for the CSTR at the given time step
+     * @param currentConcentrations an array of the the current concentrations in the reactor of all species
+     * @param CSTR the CSTR object that represents the reactor is use
+     * @return an array of the new concentration of A [0], the new concentration of B [1], and the ideal step size [2]
+     * @throws NullPointerException if the CSTR object or array of concentrations is null
+     * @author Dylan
+     */
+
     //TODO validate RK45 method using an Excel file
-    public double[] RK45 (double wholeTimeStep, double flowRate, double[] currentConcentrations, CSTRReactor CSTR) {
+    public double[] RK45 (double wholeTimeStep, double flowRate, double[] currentConcentrations, CSTRReactor CSTR) throws NullPointerException {
+
+        if(CSTR == null){
+            throw new NullPointerException("CSTR reactor object cannot be null");
+        }
+        if(currentConcentrations == null){
+            throw new NullPointerException("Current concentrations array cannot be null");
+        }
 
         double[] answerRK4 = new double[2];
         double[] answerRK5 = new double[2];
