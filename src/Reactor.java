@@ -47,17 +47,42 @@ public abstract class Reactor {
         }
         this.initialFlow=initialFlow;
 
-        //TODO add checks for these
+        if(inletConcentrations==null){
+            System.out.println("Inlet Concentrations are needed");
+            System.exit(0);
+        }
 
+        for(int i=0;i<inletConcentrations.length;i++){
+            if(inletConcentrations[i]<0){
+                System.out.println("Inlet Concentrations must not be negative");
+                System.exit(0);
+            }
+        }
         this.inletConcentrations = new double[inletConcentrations.length];
+
+        for(int i=0;i<inletConcentrations.length; i++){
+            this.inletConcentrations[i] = inletConcentrations[i];
+        }
+
+        if(initialConcentrations==null){
+            System.out.println("Initial Concentrations are needed");
+            System.exit(0);
+        }
+
+        for(int i=0;i<initialConcentrations.length;i++){
+            if(initialConcentrations[i]<0){
+                System.out.println("Initial Concentrations must not be negative");
+                System.exit(0);
+            }
+        }
+
+
         this.initialConcentrations = new double[initialConcentrations.length];
 
         for(int i=0;i<initialConcentrations.length; i++){
             this.initialConcentrations[i] = initialConcentrations[i];
         }
-        for(int i=0;i<inletConcentrations.length; i++){
-            this.inletConcentrations[i] = inletConcentrations[i];
-        }
+
 
     }
 
