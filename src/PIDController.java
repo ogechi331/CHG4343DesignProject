@@ -1,20 +1,16 @@
 /** Abstract parent class for PID control loops for transient processes
  * @author Dylan
- * @version 1.0
+ * @version 1.1
  */
 public abstract class PIDController {
 
-    //TODO still needs to be changed to throw exceptions
     private double startTime; //normally 0
     private double endTime; //greater than startTime
     private double timeStep; //needs to be big enough to make at least one time step between start and end time
     private double controllerGain; //K_C
-
     private double integratingTimeConstant; //𝛕_I
-
     private double derivativeTimeConstant;//𝛕_D
     private double numberOfSteps; //calculated from above not given directly
-
 
     /** Constructor for the abstract PID controller class
      *
@@ -24,18 +20,13 @@ public abstract class PIDController {
      * @param controllerGain controller gain
      * @param integratingTimeConstant controller integrating time constant
      * @param derivativeTimeConstant controller derivative time constant
+     * @throws IllegalArgumentException if end time is before start time or time step is too large for the range given (<1 step)
      * @author Dylan
      */
-    public PIDController(double startTime, double endTime, double timeStep, double controllerGain, double integratingTimeConstant, double derivativeTimeConstant) {
+    public PIDController(double startTime, double endTime, double timeStep, double controllerGain, double integratingTimeConstant, double derivativeTimeConstant) throws IllegalArgumentException {
 
-        if (endTime<startTime) {
-            System.out.println("Error end time must be larger than start time");
-            System.exit(0);
-        }
-        if (timeStep>(endTime-startTime)) {
-            System.out.println("Error time step is too large for time range");
-            System.exit(0);
-        }
+        if (endTime<startTime) throw new IllegalArgumentException("Error end time must be larger than start time");
+        if (timeStep>(endTime-startTime)) throw new IllegalArgumentException("Error time step is too large for time range");
 
         this.startTime = startTime;
         this.endTime = endTime;
@@ -49,13 +40,12 @@ public abstract class PIDController {
     /** Copy constructor for the abstract PID controller class
      *
      * @param source an object of the abstract PID controller class
+     * @throws NullPointerException if o object to copy is null
      * @author Dylan
      */
-    public PIDController(PIDController source) {
-        if (source==null) {
-            System.out.println("Error copy of null PIDController object");
-            System.exit(0);
-        }
+    public PIDController(PIDController source) throws NullPointerException {
+        if (source==null) throw new NullPointerException("Error, copy of null PIDController object");
+
         this.startTime=source.startTime;
         this.endTime=source.endTime;
         this.timeStep=source.timeStep;
@@ -68,8 +58,10 @@ public abstract class PIDController {
     /** Clone method to call the copy constructor
      *
      * @return a copy of the cloned object
+     * @throws NullPointerException if o object to copy is null
+     * @author Dylan
      */
-    public abstract PIDController clone();
+    public abstract PIDController clone() throws NullPointerException;
 
     /** Accessor method for start time
      *

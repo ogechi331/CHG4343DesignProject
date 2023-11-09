@@ -1,11 +1,8 @@
 /** Concrete class for the PID control of a CSTR reactor for A->B
  * @author Dylan
- * @version 2.0
+ * @version 2.1
  */
 public class CSTRControllerPID extends PIDController {
-
-    //TODO still needs to be changed to throw exceptions for the constructors
-    //TODO add equals method
 
     /** Constructor for control loop object
      *
@@ -15,18 +12,20 @@ public class CSTRControllerPID extends PIDController {
      * @param controllerGain controller gain
      * @param integratingTimeConstant controller integrating time constant
      * @param derivativeTimeConstant controller derivative time constant
+     * @throws IllegalArgumentException if end time is before start time or time step is too large for the range given (<1 step)
      * @author Dylan
      */
-    public CSTRControllerPID(double startTime, double endTime, double timeStep, double controllerGain, double integratingTimeConstant, double derivativeTimeConstant) {
+    public CSTRControllerPID(double startTime, double endTime, double timeStep, double controllerGain, double integratingTimeConstant, double derivativeTimeConstant) throws IllegalArgumentException {
         super(startTime, endTime, timeStep, controllerGain, integratingTimeConstant, derivativeTimeConstant);
     }
 
     /** Copy constructor for the control loop object
      *
      * @param source a control loop object to copy
+     * @throws NullPointerException if o object to copy is null
      * @author Dylan
      */
-    public CSTRControllerPID (CSTRControllerPID source) {
+    public CSTRControllerPID (CSTRControllerPID source) throws NullPointerException {
         super(source);
     }
 
@@ -34,9 +33,14 @@ public class CSTRControllerPID extends PIDController {
      *
      * @return a copy of the object using the copy constructor
      * @author Dylan
+     * @throws NullPointerException if o object to copy is null
      */
-    public CSTRControllerPID clone() {
-        return new CSTRControllerPID(this);
+    public CSTRControllerPID clone() throws NullPointerException {
+        try{
+            return new CSTRControllerPID(this);
+        } catch(NullPointerException e){
+            throw new NullPointerException("Failed to clone CSTRControllerPID: "+ e.getMessage());
+        }
     }
 
     /** Equals method

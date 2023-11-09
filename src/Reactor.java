@@ -1,11 +1,9 @@
 /** Abstract parent class for reactor types
  * @author Alex
  * @author Dylan
- * @version 2.0
+ * @version 2.1
  */
 public abstract class Reactor {
-
-    //TODO still needs to be changed to throw exceptions
 
     private double volume;
     private Reaction reaction;
@@ -22,81 +20,51 @@ public abstract class Reactor {
      * @param reaction reaction object representing the reactor in the reactor
      * @param initialConcentrations initial concentrations of species in the reactor
      * @param inletConcentrations inlet concentrations to the reactor after step change
+     * @throws IllegalArgumentException if volume<0, initial flow<0, concentrations<0, inlet concentrations<0
+     * @throws NullPointerException if reaction is null, initial concentrations are null or inlet concentrations are null
      * @author Alex
      * @author Dylan
      */
-    public Reactor(double volume, double initialFlow, Reaction reaction, double[] initialConcentrations, double[] inletConcentrations) {
+    public Reactor(double volume, double initialFlow, Reaction reaction, double[] initialConcentrations, double[] inletConcentrations) throws NullPointerException, IllegalArgumentException {
 
-        if(reaction==null){
-            System.out.println("A reaction is needed to initialize the reactor");
-            System.exit(0);
-        }
-
+        if(reaction==null) throw new NullPointerException("A reaction is needed to initialize the reactor");
         this.reaction= reaction.clone();
 
-        if (volume<0) {
-            System.out.println("Reactor volume must not be negative");
-            System.exit(0);
-        }
-
+        if (volume<0) throw new IllegalArgumentException("Reactor volume must not be negative");
         this.volume=volume;
 
-        if (initialFlow<0) {
-            System.out.println("Reactor initial flow must not be negative");
-            System.exit(0);
-        }
+        if (initialFlow<0) throw new IllegalArgumentException("Reactor initial flow must not be negative");
         this.initialFlow=initialFlow;
 
-        if(inletConcentrations==null){
-            System.out.println("Inlet Concentrations are needed");
-            System.exit(0);
-        }
-
+        if(inletConcentrations==null) throw new NullPointerException("Inlet Concentrations are needed");
         for(int i=0;i<inletConcentrations.length;i++){
-            if(inletConcentrations[i]<0){
-                System.out.println("Inlet Concentrations must not be negative");
-                System.exit(0);
-            }
+            if(inletConcentrations[i]<0) throw new IllegalArgumentException("Inlet Concentrations must not be negative");
         }
         this.inletConcentrations = new double[inletConcentrations.length];
-
         for(int i=0;i<inletConcentrations.length; i++){
             this.inletConcentrations[i] = inletConcentrations[i];
         }
 
-        if(initialConcentrations==null){
-            System.out.println("Initial Concentrations are needed");
-            System.exit(0);
-        }
-
+        if(initialConcentrations==null) throw new NullPointerException("Initial Concentrations are needed");
         for(int i=0;i<initialConcentrations.length;i++){
-            if(initialConcentrations[i]<0){
-                System.out.println("Initial Concentrations must not be negative");
-                System.exit(0);
-            }
+            if(initialConcentrations[i]<0) throw new IllegalArgumentException("Initial Concentrations must not be negative");
         }
-
-
         this.initialConcentrations = new double[initialConcentrations.length];
-
         for(int i=0;i<initialConcentrations.length; i++){
             this.initialConcentrations[i] = initialConcentrations[i];
         }
-
 
     }
 
     /** Copy constructor for the abstract reactor class
      *
      * @param source source object to copy
+     * @throws NullPointerException if o object to copy is null
      * @author Alex
      * @author Dylan
      */
-    public Reactor(Reactor source) {
-        if(source==null){
-            System.out.println("Null object given to copy constructor");
-            System.exit(0);
-        }
+    public Reactor(Reactor source) throws NullPointerException {
+        if (source==null) throw new NullPointerException("Error, copy of null PIDController object");
 
         this.reaction= reaction.clone();
         this.volume=source.volume;
@@ -113,10 +81,11 @@ public abstract class Reactor {
     /** Clone method for the abstract reactor class
      *
      * @return a copy of the object
+     * @throws NullPointerException if an object to copy is null
      * @author Alex
      * @author Dylan
      */
-    public abstract Reactor clone();
+    public abstract Reactor clone() throws NullPointerException;
 
     /** Accessor method for reactor volume
      *
