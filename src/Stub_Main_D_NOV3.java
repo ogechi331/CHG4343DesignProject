@@ -1,6 +1,6 @@
 public class Stub_Main_D_NOV3 {
 
-        //stub code driver class for Dylan to test integrated classes created first November 3rd, 2023
+        //stub code driver class for Dylan to test integrated classes created first November 3rd, 2023 and updated to November 9th
         public static void main(String[] args) {
 
                 double startTime = 0;
@@ -9,9 +9,9 @@ public class Stub_Main_D_NOV3 {
                 double controllerGain = 2.5;
                 double integratingTimeConstant = 0.05;
                 double derivativeTimeConstant = 2;
+                PIDController.CONTROLLER_TYPE controllerType = PIDController.CONTROLLER_TYPE.PID;
 
-
-                CSTRControllerPID controlCSTR = new CSTRControllerPID(startTime, endTime, timeStep, controllerGain, integratingTimeConstant, derivativeTimeConstant);
+                CSTRControllerPID controlCSTR = new CSTRControllerPID(startTime, endTime, timeStep, controllerGain, integratingTimeConstant, derivativeTimeConstant, controllerType);
                 //passing reaction equation and rate constant
                 Reaction reaction = new Reaction("A->B", 0.2);
                 double[] initialConcentrations = {0.04, 0.16}; //steady state before step change

@@ -1,8 +1,10 @@
 /** Abstract parent class for PID control loops for transient processes
  * @author Dylan
- * @version 1.1
+ * @version 1.2
  */
 public abstract class PIDController {
+
+    public enum CONTROLLER_TYPE {UNCONTROLLED, P, PI, PD, I, ID, D, PID}; //type of controller to use
 
     private double startTime; //normally 0
     private double endTime; //greater than startTime
@@ -12,6 +14,8 @@ public abstract class PIDController {
     private double derivativeTimeConstant;//𝛕_D
     private double numberOfSteps; //calculated from above not given directly
 
+    private CONTROLLER_TYPE controllerType; //controller type in use
+
     /** Constructor for the abstract PID controller class
      *
      * @param startTime start time for simulation, normally 0
@@ -20,11 +24,14 @@ public abstract class PIDController {
      * @param controllerGain controller gain
      * @param integratingTimeConstant controller integrating time constant
      * @param derivativeTimeConstant controller derivative time constant
+     * @param controllerType controller type which must be a type of PID or uncontrolled
      * @throws IllegalArgumentException if end time is before start time or time step is too large for the range given (<1 step)
+     * @throws NullPointerException if controller type is null
      * @author Dylan
      */
-    public PIDController(double startTime, double endTime, double timeStep, double controllerGain, double integratingTimeConstant, double derivativeTimeConstant) throws IllegalArgumentException {
+    public PIDController(double startTime, double endTime, double timeStep, double controllerGain, double integratingTimeConstant, double derivativeTimeConstant, CONTROLLER_TYPE controllerType) throws IllegalArgumentException, NullPointerException {
 
+        if (controllerType==null) throw new NullPointerException("Controller type cannot be null");
         if (endTime<startTime) throw new IllegalArgumentException("Error end time must be larger than start time");
         if (timeStep>(endTime-startTime)) throw new IllegalArgumentException("Error time step is too large for time range");
 
@@ -35,6 +42,7 @@ public abstract class PIDController {
         this.integratingTimeConstant = integratingTimeConstant;
         this.derivativeTimeConstant = derivativeTimeConstant;
         this.numberOfSteps = (int)Math.ceil((this.endTime-this.startTime)/this.timeStep)+1;
+        this.controllerType = controllerType;
     }
 
     /** Copy constructor for the abstract PID controller class
@@ -53,6 +61,7 @@ public abstract class PIDController {
         this.integratingTimeConstant=source.integratingTimeConstant;
         this.derivativeTimeConstant=source.derivativeTimeConstant;
         this.numberOfSteps=source.numberOfSteps;
+        this.controllerType=source.controllerType;
     }
 
     /** Clone method to call the copy constructor
@@ -199,6 +208,26 @@ public abstract class PIDController {
         return true;
     }
 
+    /** Accessor method for controller type
+     *
+     * @return controller type
+     * @author Dylan
+     */
+    public CONTROLLER_TYPE getControllerType() {
+        return controllerType;
+    }
+
+    /** Mutator method for controller type
+     *
+     * @param controllerType controller type which must be a type of PID or uncontrolled
+     * @return true if updated and false if not
+     * @author Dylan
+     */
+    public boolean setControllerType(CONTROLLER_TYPE controllerType) {
+        if (controllerType==null) return false;
+        this.controllerType = controllerType;
+        return true;
+    }
     /** Equals method
      *
      * @param comparator object to compare to current object

@@ -1,6 +1,6 @@
 /** Concrete class for the PID control of a CSTR reactor for A->B
  * @author Dylan
- * @version 2.1
+ * @version 2.2
  */
 public class CSTRControllerPID extends PIDController {
 
@@ -15,8 +15,8 @@ public class CSTRControllerPID extends PIDController {
      * @throws IllegalArgumentException if end time is before start time or time step is too large for the range given (<1 step)
      * @author Dylan
      */
-    public CSTRControllerPID(double startTime, double endTime, double timeStep, double controllerGain, double integratingTimeConstant, double derivativeTimeConstant) throws IllegalArgumentException {
-        super(startTime, endTime, timeStep, controllerGain, integratingTimeConstant, derivativeTimeConstant);
+    public CSTRControllerPID(double startTime, double endTime, double timeStep, double controllerGain, double integratingTimeConstant, double derivativeTimeConstant, CONTROLLER_TYPE controllerType) throws IllegalArgumentException {
+        super(startTime, endTime, timeStep, controllerGain, integratingTimeConstant, derivativeTimeConstant, controllerType);
     }
 
     /** Copy constructor for the control loop object
@@ -108,9 +108,20 @@ public class CSTRControllerPID extends PIDController {
                 simulation[1][0] = initialConcentrationA;
                 simulation[2][0] = initialConcentrationB;
                 simulation[3][0] = setPoint-simulation[2][0];
-                simulation[4][0] = super.simulateProportionalStep(simulation[3][0]);
-                simulation[5][0] = super.simulateIntegralStep(simulation[3][0]);
-                simulation[6][0] = super.simulateDerivativeStep(simulation[2][0]);
+                if (super.getControllerType()==CONTROLLER_TYPE.P || super.getControllerType()==CONTROLLER_TYPE.PI || super.getControllerType()==CONTROLLER_TYPE.PD || super.getControllerType()==CONTROLLER_TYPE.PID) {
+                    simulation[4][0] = super.simulateProportionalStep(simulation[3][0]);
+                }
+                else simulation[4][0] = 0;
+
+                if (super.getControllerType()==CONTROLLER_TYPE.PI || super.getControllerType()==CONTROLLER_TYPE.I || super.getControllerType()==CONTROLLER_TYPE.ID || super.getControllerType()==CONTROLLER_TYPE.PID) {
+                    simulation[5][0] = super.simulateIntegralStep(simulation[3][0]);
+                }
+                else simulation[5][0] = 0;
+
+                if (super.getControllerType()==CONTROLLER_TYPE.PD || super.getControllerType()==CONTROLLER_TYPE.ID || super.getControllerType()==CONTROLLER_TYPE.D || super.getControllerType()==CONTROLLER_TYPE.PID) {
+                    simulation[6][0] = super.simulateDerivativeStep(simulation[2][0]);
+                }
+                else simulation[6][0] = 0;
                 simulation[7][0] = simulation[4][0] + simulation[5][0] + simulation[6][0];
                 simulation[8][0] = initialFlowRate-simulation[7][0];
 
@@ -135,9 +146,20 @@ public class CSTRControllerPID extends PIDController {
                 simulation[1][i] = simulation[9][i-1];
                 simulation[2][i] = simulation[10][i-1];
                 simulation[3][i] = setPoint-simulation[2][i];
-                simulation[4][i] = super.simulateProportionalStep(simulation[3][i]);
-                simulation[5][i] = super.simulateIntegralStep(simulation[3][i], simulation[5][i-1]);
-                simulation[6][i] = super.simulateDerivativeStep(simulation[2][i], simulation[2][i-1]);
+                if (super.getControllerType()==CONTROLLER_TYPE.P || super.getControllerType()==CONTROLLER_TYPE.PI || super.getControllerType()==CONTROLLER_TYPE.PD || super.getControllerType()==CONTROLLER_TYPE.PID) {
+                    simulation[4][i] = super.simulateProportionalStep(simulation[3][i]);
+                }
+                else simulation[4][i] = 0;
+
+                if (super.getControllerType()==CONTROLLER_TYPE.PI || super.getControllerType()==CONTROLLER_TYPE.I || super.getControllerType()==CONTROLLER_TYPE.ID || super.getControllerType()==CONTROLLER_TYPE.PID) {
+                    simulation[5][i] = super.simulateIntegralStep(simulation[3][i], simulation[5][i - 1]);
+                }
+                else simulation[5][i] = 0;
+
+                if (super.getControllerType()==CONTROLLER_TYPE.PD || super.getControllerType()==CONTROLLER_TYPE.ID || super.getControllerType()==CONTROLLER_TYPE.D || super.getControllerType()==CONTROLLER_TYPE.PID) {
+                    simulation[6][i] = super.simulateDerivativeStep(simulation[2][i], simulation[2][i - 1]);
+                }
+                else simulation[6][i] = 0;
                 simulation[7][i] = simulation[4][i] + simulation[5][i] + simulation[6][i];
                 simulation[8][i] = initialFlowRate-simulation[7][i];
 
@@ -171,7 +193,7 @@ public class CSTRControllerPID extends PIDController {
      * @param CSTR the CSTR object that represents the reactor is use
      * @return gives the new concentration at t + timestep
      * @throws NullPointerException if the CSTR object or array of concentrations is null
-     * @deprecated code should now use an RK45 method
+     * @Deprecated code should now use an RK45 method
      * @author Dylan
      */
 
