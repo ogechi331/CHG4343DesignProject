@@ -12,6 +12,7 @@ public class CSTRControllerPID extends PIDController {
      * @param controllerGain controller gain
      * @param integratingTimeConstant controller integrating time constant
      * @param derivativeTimeConstant controller derivative time constant
+     * @param controllerType controller type which must be a type of PID or uncontrolled
      * @throws IllegalArgumentException if end time is before start time or time step is too large for the range given (<1 step)
      * @author Dylan
      */
