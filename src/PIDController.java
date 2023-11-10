@@ -1,6 +1,6 @@
 /** Abstract parent class for PID control loops for transient processes
  * @author Dylan
- * @version 1.2
+ * @version 1.3
  */
 public abstract class PIDController {
 
@@ -25,13 +25,12 @@ public abstract class PIDController {
      * @param integratingTimeConstant controller integrating time constant
      * @param derivativeTimeConstant controller derivative time constant
      * @param controllerType controller type which must be a type of PID or uncontrolled
-     * @throws IllegalArgumentException if end time is before start time or time step is too large for the range given (<1 step)
-     * @throws NullPointerException if controller type is null
+     * @throws IllegalArgumentException if end time is before start time or time step is too large for the range given (<1 step) or if controller type is null
      * @author Dylan
      */
-    public PIDController(double startTime, double endTime, double timeStep, double controllerGain, double integratingTimeConstant, double derivativeTimeConstant, CONTROLLER_TYPE controllerType) throws IllegalArgumentException, NullPointerException {
+    public PIDController(double startTime, double endTime, double timeStep, double controllerGain, double integratingTimeConstant, double derivativeTimeConstant, CONTROLLER_TYPE controllerType) throws IllegalArgumentException {
 
-        if (controllerType==null) throw new NullPointerException("Controller type cannot be null");
+        if (controllerType==null) throw new IllegalArgumentException("Controller type cannot be null");
         if (endTime<startTime) throw new IllegalArgumentException("Error end time must be larger than start time");
         if (timeStep>(endTime-startTime)) throw new IllegalArgumentException("Error time step is too large for time range");
 
@@ -48,11 +47,11 @@ public abstract class PIDController {
     /** Copy constructor for the abstract PID controller class
      *
      * @param source an object of the abstract PID controller class
-     * @throws NullPointerException if o object to copy is null
+     * @throws IllegalArgumentException if o object to copy is null
      * @author Dylan
      */
-    public PIDController(PIDController source) throws NullPointerException {
-        if (source==null) throw new NullPointerException("Error, copy of null PIDController object");
+    public PIDController(PIDController source) throws IllegalArgumentException {
+        if (source==null) throw new IllegalArgumentException("Error, copy of null PIDController object");
 
         this.startTime=source.startTime;
         this.endTime=source.endTime;
@@ -67,10 +66,10 @@ public abstract class PIDController {
     /** Clone method to call the copy constructor
      *
      * @return a copy of the cloned object
-     * @throws NullPointerException if o object to copy is null
+     * @throws IllegalArgumentException if o object to copy is null
      * @author Dylan
      */
-    public abstract PIDController clone() throws NullPointerException;
+    public abstract PIDController clone() throws IllegalArgumentException;
 
     /** Accessor method for start time
      *

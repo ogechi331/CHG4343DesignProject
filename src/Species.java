@@ -1,15 +1,16 @@
 /** Chemical species class
  * @author Ogechi
- * @version 1.0
+ * @author Dylan
+ * @version 1.2
  */
 public class Species implements Cloneable{
     private String name;
     private int coefficient;
 
-    /**
+    /** Constructor for species object
      *
-     * @param name
-     * @param coefficient
+     * @param name string name for species i.e A, Na or Cl
+     * @param coefficient reaction equation coefficient for the species
      * @author Ogechi
      */
     public Species(String name, int coefficient){
@@ -17,24 +18,27 @@ public class Species implements Cloneable{
         this.coefficient = coefficient;
     }
 
-    /**
+    /** Copy constructor for species object
      *
-     * @param other
+     * @param source species object to copy
+     * @throws IllegalArgumentException cannot copy null object
      * @author Ogechi
      */
-    public Species(Species other){
-        if(other == null ){throw new IllegalArgumentException("Cannot copy null Species");}
-        this.name = other.name;
-        this.coefficient = other.coefficient;
+    public Species(Species source){
+        if(source == null ){throw new IllegalArgumentException("Cannot copy null Species");}
+        this.name = source.name;
+        this.coefficient = source.coefficient;
     }
 
-    /**
+    /** Clone method to copy species object
      *
-     * @return
+     * @return copy of species object
+     * @throws IllegalArgumentException cannot copy null object
      * @author Ogechi
+     * @author Dylan
      */
     @Override
-    protected Species clone(){
+    public Species clone(){
         try{
             return new Species(this);
         } catch(IllegalArgumentException e){
@@ -42,40 +46,46 @@ public class Species implements Cloneable{
         }
     }
 
-    /**
+    /** Accessor method for species coefficient
      *
-     * @return
+     * @return species coefficient
      * @author Ogechi
      */
     public int getCoefficient() {
         return coefficient;
     }
 
-    /**
+    /** Accessor method for species name
      *
-     * @return
+     * @return species name
      * @author Ogechi
      */
     public String getName() {
         return name;
     }
 
-    /**
+    /** Mutator method for species coefficient
      *
-     * @param coefficient
+     * @param coefficient takes species coefficient
+     * @return true when updated
      * @author Ogechi
+     * @author Dylan
      */
-    public void setCoefficient(int coefficient) {
+    public boolean setCoefficient(int coefficient) {
         this.coefficient = coefficient;
+        return true;
     }
 
-    /**
+    /** Mutator method for species name
      *
-     * @param name
+     * @param name takes species name
+     * @return true when updated
      * @author Ogechi
+     * @author Dylan
      */
-    public void setName(String name) {
+    public boolean setName(String name) {
         this.name = name;
+        return true;
     }
 
 }

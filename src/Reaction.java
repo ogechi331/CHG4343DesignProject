@@ -1,7 +1,7 @@
 /** Reaction class
  * @author Ogechi
  * @author Dylan
- * @version 1.1
+ * @version 1.2
  */
 public class Reaction implements Cloneable{
 
@@ -10,10 +10,10 @@ public class Reaction implements Cloneable{
     private Species limitingReactant;
     private double k;
 
-    /**
+    /** Constructor for reaction object
      *
-     * @param rEquation
-     * @param k
+     * @param rEquation string version of the reaction equation with a -> deliminator
+     * @param k rate constant k
      * @author Ogechi
      */
     public Reaction(String rEquation, double k){
@@ -21,111 +21,142 @@ public class Reaction implements Cloneable{
         this.k = k;
     }
 
-    /**
+    /** Copy constructor for reaction object
      *
-     * @param other
+     * @param source reaction object to copy
+     * @throws IllegalArgumentException cannot copy null reaction object
      * @author Ogechi
      */
-    public Reaction(Reaction other){
-        this.reactants = new Species[other.reactants.length];
-        this.products = new Species[other.products.length];
-        for(int i = 0; i < other.reactants.length; i++){
-            this.reactants[i] = other.reactants[i].clone();
+    public Reaction(Reaction source){
+        if (source==null) throw new IllegalArgumentException("Error, copy of null reaction object");
+
+        this.reactants = new Species[source.reactants.length];
+        this.products = new Species[source.products.length];
+        for(int i = 0; i < source.reactants.length; i++){
+            this.reactants[i] = source.reactants[i].clone();
         }
-        for(int i = 0; i < other.products.length; i++){
-            this.products[i] = other.products[i].clone();
+        for(int i = 0; i < source.products.length; i++){
+            this.products[i] = source.products[i].clone();
         }
-        this.limitingReactant = other.limitingReactant;
-        this.k = other.k;
+        this.limitingReactant = source.limitingReactant;
+        this.k = source.k;
     }
 
-    /**
+    /** Clone method for reaction object
      *
-     * @return
+     * @return a copy of reaction object
+     * @throws IllegalArgumentException cannot clone null object
      * @author Ogechi
+     * @author Dylan
      */
     @Override
-    protected Reaction clone(){
-        return new Reaction(this);
+    public Reaction clone(){
+        try{
+            return new Reaction(this);
+        } catch(IllegalArgumentException e){
+            throw new IllegalArgumentException("Failed to clone reaction: "+ e.getMessage());
+        }
     }
 
-    /**
+    /** Accessor method for reaction rate constant k
      *
-     * @return
+     * @return reaction rate constant k
      * @author Ogechi
      */
     public double getK() {
         return k;
     }
 
-    /**
+    /** Accessor method for limiting reactant
      *
-     * @return
+     * @return limiting reactant species
      * @author Ogechi
      */
     public Species getLimitingReactant() {
         return limitingReactant;
     }
 
-    /**
+    /** Accessor method for products species
      *
-     * @return
+     * @return array of product species
      * @author Ogechi
      */
     public Species[] getProducts() {
         return products.clone();
     }
 
-    /**
+    /** Mutator method for reaction rate constant k
      *
-     * @param k
+     * @param k reaction rate constant k
+     * @return true when updated
      * @author Ogechi
+     * @author Dylan
      */
-    public void setK(double k) {
+    public boolean setK(double k) {
         this.k = k;
+        return true;
     }
 
-    /**
+    /** Mutator method for limiting reactant
      *
-     * @param limitingReactant
+     * @param limitingReactant limiting reactant species
+     * @return true if updated or false if not updated
      * @author Ogechi
+     * @author Dylan
      */
-    public void setLimitingReactant(Species limitingReactant) {
+    public boolean setLimitingReactant(Species limitingReactant) {
+        if (limitingReactant==null) return false;
         this.limitingReactant = limitingReactant;
+        return true;
     }
 
-    /**
+    /** Mutator method for products species
      *
-     * @param products
+     * @param products array of products species
+     * @return true if updated or false if not updated
      * @author Ogechi
+     * @author Dylan
      */
-    public void setProducts(Species[] products) {
+    public boolean setProducts(Species[] products) {
+        if (products==null) return false;
+        for (int i=0; i< products.length; i++) {
+            if(products[i]==null) return false;
+        }
         this.products = new Species[products.length];
         for(int i = 0; i < products.length; i++) {
             this.products[i] = products[i].clone();
         }
+        return true;
     }
 
-    /**
+    /** Mutator method for reactants species
      *
-     * @param reactants
+     * @param reactants array of reactants species
+     * @return true if updated or false if not updated
      * @author Ogechi
+     * @author Dylan
      */
-    public void setReactants(Species[] reactants) {
+    public boolean setReactants(Species[] reactants) {
+        if (reactants==null) return false;
+        for (int i=0; i< reactants.length; i++) {
+            if(reactants[i]==null) return false;
+        }
         this.reactants = new Species[reactants.length];
         for(int i = 0; i < reactants.length; i++) {
             this.reactants[i] = reactants[i].clone();
         }
+        return true;
     }
 
-    /**
+    /** Private method to calculate the limiting reactant
      *
-     * @param concentrations
+     * @param concentrations concentrations array
+     * @throws IllegalArgumentException reactants and products must not be null
      * @author Ogechi
      */
-    private void calculateLimitingReactant(double[] concentrations){
+    private void calculateLimitingReactant(double[] concentrations) throws IllegalArgumentException {
         if (reactants == null || products == null){
-            throw new NullPointerException("Reactants/Products cannot be null");
+            throw new IllegalArgumentException("Reactants/Products cannot be null");
         }
         //assumes that the order of species in concentration array matches the order of species in the reactants array
         double mol = Double.MAX_VALUE;
@@ -142,9 +173,9 @@ public class Reaction implements Cloneable{
         }
     }
 
-    /**
+    /** Private method to parse reaction equation into products and reactants
      *
-     * @param rEquation
+     * @param rEquation takes reaction equation string
      * @author Ogechi
      */
     private void parseReactionEquation(String rEquation) {
@@ -160,10 +191,10 @@ public class Reaction implements Cloneable{
         products = parseSpeciesList(productParts);
     }
 
-    /**
+    /** Private method to parse reactants or products list into individual species
      *
-     * @param speciesList
-     * @return
+     * @param speciesList takes array of species
+     * @return array of individual species
      * @author Ogechi
      */
     private Species[] parseSpeciesList(String speciesList){
@@ -176,10 +207,10 @@ public class Reaction implements Cloneable{
         return species;
     }
 
-    /**
+    /** Private method to parse species into coefficient and name
      *
-     * @param speciesString
-     * @return
+     * @param speciesString takes species string
+     * @return individual species object
      * @author Ogechi
      */
     private Species parseSpecies(String speciesString) {
@@ -218,14 +249,5 @@ public class Reaction implements Cloneable{
         }
         return k*prod;
     }
-
-    /**
-     *
-     * @author Ogechi
-     */
-    public void updateCompositions(){//TBD
-        throw new UnsupportedOperationException();
-    }
-
 
 }

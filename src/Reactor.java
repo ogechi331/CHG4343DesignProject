@@ -1,7 +1,7 @@
 /** Abstract parent class for reactor types
  * @author Alex
  * @author Dylan
- * @version 2.1
+ * @version 2.2
  */
 public abstract class Reactor {
 
@@ -20,14 +20,13 @@ public abstract class Reactor {
      * @param reaction reaction object representing the reactor in the reactor
      * @param initialConcentrations initial concentrations of species in the reactor
      * @param inletConcentrations inlet concentrations to the reactor after step change
-     * @throws IllegalArgumentException if volume<0, initial flow<0, concentrations<0, inlet concentrations<0
-     * @throws NullPointerException if reaction is null, initial concentrations are null or inlet concentrations are null
+     * @throws IllegalArgumentException if volume<0, initial flow<0, concentrations<0, inlet concentrations<0, and if reaction, initial concentrations or initial concentrations are null
      * @author Alex
      * @author Dylan
      */
     public Reactor(double volume, double initialFlow, Reaction reaction, double[] initialConcentrations, double[] inletConcentrations) throws NullPointerException, IllegalArgumentException {
 
-        if(reaction==null) throw new NullPointerException("A reaction is needed to initialize the reactor");
+        if(reaction==null) throw new IllegalArgumentException("A reaction is needed to initialize the reactor");
         this.reaction= reaction.clone();
 
         if (volume<0) throw new IllegalArgumentException("Reactor volume must not be negative");
@@ -36,7 +35,7 @@ public abstract class Reactor {
         if (initialFlow<0) throw new IllegalArgumentException("Reactor initial flow must not be negative");
         this.initialFlow=initialFlow;
 
-        if(inletConcentrations==null) throw new NullPointerException("Inlet Concentrations are needed");
+        if(inletConcentrations==null) throw new IllegalArgumentException("Inlet Concentrations are needed");
         for(int i=0;i<inletConcentrations.length;i++){
             if(inletConcentrations[i]<0) throw new IllegalArgumentException("Inlet Concentrations must not be negative");
         }
@@ -45,7 +44,7 @@ public abstract class Reactor {
             this.inletConcentrations[i] = inletConcentrations[i];
         }
 
-        if(initialConcentrations==null) throw new NullPointerException("Initial Concentrations are needed");
+        if(initialConcentrations==null) throw new IllegalArgumentException("Initial Concentrations are needed");
         for(int i=0;i<initialConcentrations.length;i++){
             if(initialConcentrations[i]<0) throw new IllegalArgumentException("Initial Concentrations must not be negative");
         }
@@ -59,12 +58,12 @@ public abstract class Reactor {
     /** Copy constructor for the abstract reactor class
      *
      * @param source source object to copy
-     * @throws NullPointerException if o object to copy is null
+     * @throws IllegalArgumentException if o object to copy is null
      * @author Alex
      * @author Dylan
      */
-    public Reactor(Reactor source) throws NullPointerException {
-        if (source==null) throw new NullPointerException("Error, copy of null PIDController object");
+    public Reactor(Reactor source) throws IllegalArgumentException {
+        if (source==null) throw new IllegalArgumentException("Error, copy of null PIDController object");
 
         this.reaction= reaction.clone();
         this.volume=source.volume;
@@ -81,11 +80,11 @@ public abstract class Reactor {
     /** Clone method for the abstract reactor class
      *
      * @return a copy of the object
-     * @throws NullPointerException if an object to copy is null
+     * @throws IllegalArgumentException if an object to copy is null
      * @author Alex
      * @author Dylan
      */
-    public abstract Reactor clone() throws NullPointerException;
+    public abstract Reactor clone() throws IllegalArgumentException;
 
     /** Accessor method for reactor volume
      *

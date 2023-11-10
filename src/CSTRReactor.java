@@ -1,7 +1,7 @@
 /** Concrete class for the CSTR reactor
  * @author Alex
  * @author Dylan
- * @version 2.1
+ * @version 2.2
  */
 public class CSTRReactor extends Reactor {
 
@@ -12,38 +12,37 @@ public class CSTRReactor extends Reactor {
      * @param reaction reaction object representing the reactor in the reactor
      * @param initialConcentrations initial concentrations of species in the reactor
      * @param inletConcentrations inlet concentrations to the reactor after step change
-     * @throws IllegalArgumentException if volume<0, initial flow<0, concentrations<0, inlet concentrations<0
-     * @throws NullPointerException if reaction is null, initial concentrations are null or inlet concentrations are null
+     * @throws IllegalArgumentException if volume<0, initial flow<0, concentrations<0, inlet concentrations<0, and if reaction, initial concentrations or initial concentrations are null
      * @author Alex
      * @author Dylan
      */
-    public CSTRReactor(double V, double initialFlow, Reaction reaction, double[] initialConcentrations, double[] inletConcentrations) throws NullPointerException, IllegalArgumentException{
+    public CSTRReactor(double V, double initialFlow, Reaction reaction, double[] initialConcentrations, double[] inletConcentrations) throws IllegalArgumentException{
         super(V, initialFlow, reaction, initialConcentrations, inletConcentrations);
     }
 
     /** Copy constructor for the CSTR reactor
      *
      * @param source source object to copy
-     * @throws NullPointerException if o object to copy is null
+     * @throws IllegalArgumentException if o object to copy is null
      * @author Alex
      * @author Dylan
      */
-    public CSTRReactor(CSTRReactor source) throws NullPointerException {
+    public CSTRReactor(CSTRReactor source) throws IllegalArgumentException {
         super(source);
     }
 
     /** Clone method for the CSTR reactor
      *
      * @return a copy of the object
-     * @throws NullPointerException if o object to copy is null
+     * @throws IllegalArgumentException if o object to copy is null
      * @author Alex
      * @author Dylan
      */
-    public CSTRReactor clone() throws NullPointerException {
+    public CSTRReactor clone() throws IllegalArgumentException {
         try{
             return new CSTRReactor(this);
-        } catch(NullPointerException e){
-            throw new NullPointerException("Failed to clone CSTRReactor: "+ e.getMessage());
+        } catch(IllegalArgumentException e){
+            throw new IllegalArgumentException("Failed to clone CSTRReactor: "+ e.getMessage());
         }
     }
 
@@ -73,17 +72,22 @@ public class CSTRReactor extends Reactor {
         double reactionRate;
         double[] inletConcentrations = new double[super.getInletConcentrations().length];
 
-        double changeRate;
+        double changeRate = 0;
 
         inletConcentrations = super.getInletConcentrations();
+        try {
+            reactionRate = super.getReaction().calculateReactionRate(currentConcentrations, currentSpeciesNumber);
 
-        reactionRate=super.getReaction().calculateReactionRate(currentConcentrations,currentSpeciesNumber);
+            changeRate = flowRate*inletConcentrations[currentSpeciesNumber];
+            changeRate = changeRate - (flowRate*currentConcentrations[currentSpeciesNumber]);
+            changeRate = changeRate + (reactionRate*super.getVolume());
 
-        changeRate = flowRate*inletConcentrations[currentSpeciesNumber];
-        changeRate = changeRate - (flowRate*currentConcentrations[currentSpeciesNumber]);
-        changeRate = changeRate + (reactionRate*super.getVolume());
-
-        changeRate = ((1/super.getVolume())*changeRate);
+            changeRate = ((1/super.getVolume())*changeRate);
+        }
+        catch (IllegalArgumentException e) {
+            System.out.println("Failed to simulate step: " + e.getMessage());
+            System.exit(0);
+        }
 
         return changeRate;
     }

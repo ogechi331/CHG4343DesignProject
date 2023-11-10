@@ -1,6 +1,6 @@
 /** Concrete class for the PID control of a CSTR reactor for A->B
  * @author Dylan
- * @version 2.2
+ * @version 2.3
  */
 public class CSTRControllerPID extends PIDController {
 
@@ -13,7 +13,7 @@ public class CSTRControllerPID extends PIDController {
      * @param integratingTimeConstant controller integrating time constant
      * @param derivativeTimeConstant controller derivative time constant
      * @param controllerType controller type which must be a type of PID or uncontrolled
-     * @throws IllegalArgumentException if end time is before start time or time step is too large for the range given (<1 step)
+     * @throws IllegalArgumentException if end time is before start time or time step is too large for the range given (<1 step) or if controller type is null
      * @author Dylan
      */
     public CSTRControllerPID(double startTime, double endTime, double timeStep, double controllerGain, double integratingTimeConstant, double derivativeTimeConstant, CONTROLLER_TYPE controllerType) throws IllegalArgumentException {
@@ -23,10 +23,10 @@ public class CSTRControllerPID extends PIDController {
     /** Copy constructor for the control loop object
      *
      * @param source a control loop object to copy
-     * @throws NullPointerException if o object to copy is null
+     * @throws IllegalArgumentException if o object to copy is null
      * @author Dylan
      */
-    public CSTRControllerPID (CSTRControllerPID source) throws NullPointerException {
+    public CSTRControllerPID (CSTRControllerPID source) throws IllegalArgumentException {
         super(source);
     }
 
@@ -34,13 +34,13 @@ public class CSTRControllerPID extends PIDController {
      *
      * @return a copy of the object using the copy constructor
      * @author Dylan
-     * @throws NullPointerException if o object to copy is null
+     * @throws IllegalArgumentException if o object to copy is null
      */
-    public CSTRControllerPID clone() throws NullPointerException {
+    public CSTRControllerPID clone() throws IllegalArgumentException {
         try{
             return new CSTRControllerPID(this);
-        } catch(NullPointerException e){
-            throw new NullPointerException("Failed to clone CSTRControllerPID: "+ e.getMessage());
+        } catch(IllegalArgumentException e){
+            throw new IllegalArgumentException("Failed to clone CSTRControllerPID: "+ e.getMessage());
         }
     }
 
@@ -75,13 +75,13 @@ public class CSTRControllerPID extends PIDController {
      * [9] is new CA
      * [10] is new CB
      * [11] is the ideal step size calculation from RK45
-     * @throws NullPointerException if the CSTR object is null
+     * @throws IllegalArgumentException if the CSTR object is null
      * @author Dylan
      */
-    public double[][] stimulateProcess (double initialConcentrationA, double initialConcentrationB, double setPoint, double initialFlowRate, CSTRReactor CSTR) throws NullPointerException { //for test case 2 initial is 0.2 and setPoint is 1.2
+    public double[][] stimulateProcess (double initialConcentrationA, double initialConcentrationB, double setPoint, double initialFlowRate, CSTRReactor CSTR) throws IllegalArgumentException { //for test case 2 initial is 0.2 and setPoint is 1.2
 
         if(CSTR == null){
-            throw new NullPointerException("CSTR reactor object cannot be null");
+            throw new IllegalArgumentException("CSTR reactor object cannot be null");
         }
 
         double[][] simulation = new double[12][(int)super.getNumberOfSteps()];
@@ -193,18 +193,18 @@ public class CSTRControllerPID extends PIDController {
      * @param currentSpeciesNumber the species i to calculate the new concentration of
      * @param CSTR the CSTR object that represents the reactor is use
      * @return gives the new concentration at t + timestep
-     * @throws NullPointerException if the CSTR object or array of concentrations is null
+     * @throws IllegalArgumentException if the CSTR object or array of concentrations is null
      * @Deprecated code should now use an RK45 method
      * @author Dylan
      */
 
-    public double eulersMethod (double wholeTimeStep, double flowRate, double[] currentConcentrations, int currentSpeciesNumber, CSTRReactor CSTR) throws NullPointerException {
+    public double eulersMethod (double wholeTimeStep, double flowRate, double[] currentConcentrations, int currentSpeciesNumber, CSTRReactor CSTR) throws IllegalArgumentException {
 
         if(CSTR == null){
-            throw new NullPointerException("CSTR reactor object cannot be null");
+            throw new IllegalArgumentException("CSTR reactor object cannot be null");
         }
         if(currentConcentrations == null){
-            throw new NullPointerException("Current concentrations array cannot be null");
+            throw new IllegalArgumentException("Current concentrations array cannot be null");
         }
 
         double answer;
@@ -222,18 +222,18 @@ public class CSTRControllerPID extends PIDController {
      * @param currentConcentrations an array of the the current concentrations in the reactor of all species
      * @param CSTR the CSTR object that represents the reactor is use
      * @return an array of the new concentration of A [0], the new concentration of B [1], and the ideal step size [2]
-     * @throws NullPointerException if the CSTR object or array of concentrations is null
+     * @throws IllegalArgumentException if the CSTR object or array of concentrations is null
      * @author Dylan
      */
 
     //TODO validate RK45 method using an Excel file
-    public double[] RK45 (double wholeTimeStep, double flowRate, double[] currentConcentrations, CSTRReactor CSTR) throws NullPointerException {
+    public double[] RK45 (double wholeTimeStep, double flowRate, double[] currentConcentrations, CSTRReactor CSTR) throws IllegalArgumentException {
 
         if(CSTR == null){
-            throw new NullPointerException("CSTR reactor object cannot be null");
+            throw new IllegalArgumentException("CSTR reactor object cannot be null");
         }
         if(currentConcentrations == null){
-            throw new NullPointerException("Current concentrations array cannot be null");
+            throw new IllegalArgumentException("Current concentrations array cannot be null");
         }
 
         double[] answerRK4 = new double[2];
