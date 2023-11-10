@@ -1,6 +1,5 @@
 public interface CSTR {
-    //TODO:  fix variable inputs
-    //TODO: verify completeness of interface
+    //TODO: Remove or use
 
     void simulateTransient();
     void respondToSetPointChange();

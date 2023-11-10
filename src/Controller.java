@@ -1,6 +1,5 @@
 public interface Controller {
-    //TODO: fix variable inputs
-    //TODO: verify completeness of interface
+    //TODO: Remove or use
 
     double calculateControlOutput();
     void setConstants();
