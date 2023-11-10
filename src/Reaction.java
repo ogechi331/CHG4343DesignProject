@@ -1,7 +1,7 @@
 /** Reaction class
  * @author Ogechi
  * @author Dylan
- * @version 1.2
+ * @version 1.3
  */
 public class Reaction implements Cloneable{
 
@@ -144,6 +144,29 @@ public class Reaction implements Cloneable{
         this.reactants = new Species[reactants.length];
         for(int i = 0; i < reactants.length; i++) {
             this.reactants[i] = reactants[i].clone();
+        }
+        return true;
+    }
+
+    /** Equals method for reaction object
+     *
+     * @param comparator object to compare
+     * @return true if all instant variables and class type are equal, otherwise returns false
+     * @author Dylan
+     */
+    public boolean equals(Object comparator) {
+        if (comparator==null) return false;
+        if (comparator.getClass()!=this.getClass()) return false;
+        Reaction specificComparator = (Reaction)comparator;
+        if (specificComparator.reactants.length != this.reactants.length) return false;
+        if (specificComparator.products.length != this.products.length) return false;
+        if (!(specificComparator.limitingReactant.equals(this.limitingReactant))) return false;
+        if (specificComparator.k != this.k) return false;
+        for (int i =0; i < this.reactants.length; i++) {
+            if (!(specificComparator.reactants[i].equals(this.reactants[i]))) return false;
+        }
+        for (int i =0; i < this.products.length; i++) {
+            if (!(specificComparator.products[i].equals(this.products[i]))) return false;
         }
         return true;
     }

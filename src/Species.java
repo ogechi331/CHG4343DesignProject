@@ -1,7 +1,7 @@
 /** Chemical species class
  * @author Ogechi
  * @author Dylan
- * @version 1.2
+ * @version 1.3
  */
 public class Species implements Cloneable{
     private String name;
@@ -85,6 +85,21 @@ public class Species implements Cloneable{
      */
     public boolean setName(String name) {
         this.name = name;
+        return true;
+    }
+
+    /** Equals method for species object
+     *
+     * @param comparator Object to compare
+     * @return true if all instant variables and class type are equal, otherwise returns false
+     * @author Dylan
+     */
+    public boolean equals(Object comparator) {
+        if (comparator==null) return false;
+        if (comparator.getClass()!=this.getClass()) return false;
+        Species specificComparator = (Species)comparator;
+        if (!(specificComparator.name.equals(this.name))) return false;
+        if (specificComparator.coefficient != this.coefficient) return false;
         return true;
     }
 
