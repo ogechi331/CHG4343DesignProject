@@ -6,6 +6,7 @@
 public class Reaction implements Cloneable{
 
     private Species[] reactants;
+    private int delimeter;
     private Species[] products;
     private Species limitingReactant;
     private double k;
@@ -19,6 +20,7 @@ public class Reaction implements Cloneable{
     public Reaction(String rEquation, double k){
         parseReactionEquation(rEquation);
         this.k = k;
+        this.delimeter = reactants.length - 1;
     }
 
     /** Copy constructor for reaction object
@@ -85,6 +87,10 @@ public class Reaction implements Cloneable{
         return products.clone();
     }
 
+    public int getDelimeter() {
+        return delimeter;
+    }
+
     /** Mutator method for reaction rate constant k
      *
      * @param k reaction rate constant k
@@ -145,6 +151,12 @@ public class Reaction implements Cloneable{
         for(int i = 0; i < reactants.length; i++) {
             this.reactants[i] = reactants[i].clone();
         }
+        setDelimeter(reactants.length -1);
+
+        return true;
+    }
+    public boolean setDelimeter(int delimeter){
+        this.delimeter = delimeter;
         return true;
     }
 
@@ -196,7 +208,7 @@ public class Reaction implements Cloneable{
         }
     }
 
-    /** Private method to parse reaction equation into products and reactants
+    /** Private method to parse reaction equation into products and reactants using the String regex "->"
      *
      * @param rEquation takes reaction equation string
      * @author Ogechi

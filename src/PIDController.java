@@ -2,19 +2,19 @@
  * @author Dylan
  * @version 1.3
  */
-public abstract class PIDController {
+public class PIDController extends Controller{
 
-    public enum CONTROLLER_TYPE {UNCONTROLLED, P, PI, PD, I, ID, D, PID}; //type of controller to use
+    public enum CONTROLLER_TYPE {P, PI, PD, I, ID, D, PID}; //type of controller to use
 
-    private double startTime; //normally 0
-    private double endTime; //greater than startTime
-    private double timeStep; //needs to be big enough to make at least one time step between start and end time
-    private double controllerGain; //K_C
-    private double integratingTimeConstant; //𝛕_I
-    private double derivativeTimeConstant;//𝛕_D
-    private double numberOfSteps; //calculated from above not given directly
+    protected double startTime; //normally 0
+    protected double endTime; //greater than startTime
+    protected double timeStep; //needs to be big enough to make at least one time step between start and end time
+    protected double controllerGain; //K_C
+    protected double integratingTimeConstant; //𝛕_I
+    protected double derivativeTimeConstant;//𝛕_D
+    protected double numberOfSteps; //calculated from above not given directly
 
-    private CONTROLLER_TYPE controllerType; //controller type in use
+    protected CONTROLLER_TYPE controllerType; //controller type in use
 
     /** Constructor for the abstract PID controller class
      *
@@ -69,7 +69,9 @@ public abstract class PIDController {
      * @throws IllegalArgumentException if o object to copy is null
      * @author Dylan
      */
-    public abstract PIDController clone() throws IllegalArgumentException;
+    public PIDController clone() throws IllegalArgumentException{
+        throw new UnsupportedOperationException();
+    };
 
     /** Accessor method for start time
      *
@@ -251,53 +253,55 @@ public abstract class PIDController {
     /** Simulation for proportional part of PID controller function for all steps
      *
      * @param error error between real value and set point
-     * @return proportional controller value
      * @author Dylan
+     * @author Ogechi
      */
-    public double simulateProportionalStep(double error) {
-        return this.controllerGain*error;
+    public void simulateProportionalStep(double error) {
+        if(controllerType == CONTROLLER_TYPE.P || controllerType == CONTROLLER_TYPE.PD || controllerType == CONTROLLER_TYPE.PID) {
+            P =this.controllerGain*error;
+        } else{ P = 0;}
     }
 
     /** Simulation for integral part of PID controller function for steps i>0 steps
      *
      * @param error error between real value and set point
-     * @param pastIntegralPart integral part of the last time step of the PID controller
-     * @return  integral controller value
      * @author Dylan
+     * @author Ogechi
      */
-    public double simulateIntegralStep(double error, double pastIntegralPart) {
-        return (pastIntegralPart+((this.controllerGain/this.integratingTimeConstant)*error*this.timeStep));
-    }
-
-    /** Simulation for integral part of PID controller function for steps i=0 step
-     *
-     * @param error error between real value and set point
-     * @return integral controller value
-     * @author Dylan
-     */
-    public double simulateIntegralStep(double error) {
-        return ((this.controllerGain/this.integratingTimeConstant)*error*this.timeStep);
+    public void simulateIntegralStep(double error) {
+        if(controllerType == CONTROLLER_TYPE.I || controllerType == CONTROLLER_TYPE.PI || controllerType ==CONTROLLER_TYPE.ID || controllerType == CONTROLLER_TYPE.PID){
+            I = pastI+((this.controllerGain/this.integratingTimeConstant)*error*this.timeStep);
+        }else{ I = 0;}
     }
 
     /** Simulation for derivative part of PID controller function for steps i>0 steps
      *
      * @param currentValue current value of the controller variable
-     * @param pastValue value for the controller variable from the previous time step
-     * @return derivative controller value
      * @author Dylan
+     * @author Ogechi
      */
-    public double simulateDerivativeStep(double currentValue, double pastValue) {
-        return (-this.controllerGain*this.derivativeTimeConstant*((currentValue-pastValue)/this.timeStep));
+    public void simulateDerivativeStep(double currentValue) {
+        if(controllerType == CONTROLLER_TYPE.D || controllerType == CONTROLLER_TYPE.PD || controllerType == CONTROLLER_TYPE.ID || controllerType == CONTROLLER_TYPE.PID){
+            D = -this.controllerGain*this.derivativeTimeConstant*((currentValue-pastD)/this.timeStep);
+            pastD = currentValue;
+        }else{D = 0;}
     }
 
-    /** Simulation for derivative part of PID controller function for steps i=0 step
+
+    /** Calculates the controller output for a given object
      *
-     * @param currentValue the current value of the controller variable
-     * @return derivative controller value
-     * @author Dylan
+     * @param object Object that implements Controllable
+     * @return value of the controlled variable
+     * @author Ogechi
      */
-    public double simulateDerivativeStep(double currentValue) {
-        return (-this.controllerGain*this.derivativeTimeConstant*((currentValue)/this.timeStep));
+    public double compute(Controllable object){
+        double error = setPoint - processVariable;
+        simulateProportionalStep(error);
+        simulateIntegralStep(error);
+        simulateDerivativeStep(error);
+        pastI = I;
+        pastD = processVariable;
+        return P + I + D > 0 ? P + I + D: 0;
     }
 
 } //end of class

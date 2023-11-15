@@ -1,10 +1,11 @@
 /** Concrete class for the CSTR reactor
  * @author Alex
  * @author Dylan
+ * @author Ogechi
  * @version 2.2
  */
 public class CSTRReactor extends Reactor {
-
+    private int currSpeciesNumber;
     /** Constructor for CSTR reactor
      *
      * @param V reactor volume
@@ -17,7 +18,10 @@ public class CSTRReactor extends Reactor {
      * @author Dylan
      */
     public CSTRReactor(double V, double initialFlow, Reaction reaction, double[] initialConcentrations, double[] inletConcentrations) throws IllegalArgumentException{
-        super(V, initialFlow, reaction, initialConcentrations, inletConcentrations);
+        super(V, initialFlow, reaction, initialConcentrations, inletConcentrations, 0, null);
+    }
+    public CSTRReactor(double V, double initialFlow, Reaction reaction, double[] initialConcentrations, double[] inletConcentrations, int controlled, PIDController controller) throws IllegalArgumentException{
+        super(V, initialFlow, reaction, initialConcentrations, inletConcentrations, controlled, controller);
     }
 
     /** Copy constructor for the CSTR reactor
@@ -54,8 +58,7 @@ public class CSTRReactor extends Reactor {
      * @author Dylan
      */
     public boolean equals(Object comparator){
-        if (!(super.equals(comparator))) return false;
-        return true;
+        return super.equals(comparator);
     }
 
     /** Method to simulate change in concentration over time step
@@ -86,10 +89,72 @@ public class CSTRReactor extends Reactor {
         }
         catch (IllegalArgumentException e) {
             System.out.println("Failed to simulate step: " + e.getMessage());
-            System.exit(0);
         }
 
         return changeRate;
     }
 
+
+    public double[] getSystemOutput(double t, double endTime) {
+        int n = inletConcentrations.length;
+        this.currSpeciesNumber = 0;
+        DifferentialEquation[] equations =  new DifferentialEquation[n];
+        for (int i =0; i<n; i++){
+            equations[i] = this;
+        }
+        double[][] solution = RK4Solver.solve(t, inletConcentrations, endTime, equations);
+        int j = solution.length -2;
+        System.arraycopy(solution[j], 0, inletConcentrations, 0, n);
+        return solution[j];
+
+    }
+
+    @Override
+    public boolean isControlled() {
+        return controller != null;
+    }
+
+    @Override
+    public double getControlledVar() {
+        return inletConcentrations[controlled];
+    }
+
+
+    @Override
+    public double[] getInitialValues() {
+        return new double[0];
+    }
+
+    @Override
+    public PIDController getController() {
+        return this.controller.clone();
+    }
+
+    @Override
+    public void setManipulatedVariable(double var) {
+        initialFlow = var;
+    }
+
+
+    @Override
+    public double apply(double x, double y) {
+        double reactionRate = 0;
+        try {
+            reactionRate = reaction.calculateReactionRate(inletConcentrations, currSpeciesNumber);
+
+        }
+        catch (IllegalArgumentException e) {
+            System.out.println("Failed to simulate step: " + e.getMessage());
+        }
+        if (currSpeciesNumber > reaction.getDelimeter()){ //product mass balance
+            return initialFlow*initialConcentrations[currSpeciesNumber]/volume + reactionRate - initialFlow*inletConcentrations[currSpeciesNumber]/volume;
+        }
+        //reactant mass balance
+        double changeRate =  initialFlow*initialConcentrations[currSpeciesNumber]/volume - reactionRate - initialFlow*inletConcentrations[currSpeciesNumber]/volume;
+        if(changeRate < 0) changeRate = 0;
+
+        //change the species number for the next call of apply
+        currSpeciesNumber = currSpeciesNumber + 1 < inletConcentrations.length-1? currSpeciesNumber+1 : 0;
+        return changeRate;
+    }
 }

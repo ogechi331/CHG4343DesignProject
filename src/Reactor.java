@@ -3,15 +3,22 @@
  * @author Dylan
  * @version 2.2
  */
-public abstract class Reactor {
+public abstract class Reactor implements Controllable, DifferentialEquation {
 
-    private double volume;
-    private Reaction reaction;
-    private double[] inletConcentrations;
+    protected double volume;
+    protected Reaction reaction;
+    protected double[] inletConcentrations;
 
-    private double[] initialConcentrations;
+    protected double[] initialConcentrations;
 
-    private double initialFlow;
+    protected double initialFlow;
+
+    protected int controlled;
+    protected double currFlow;
+    protected int currSpeciesNumber;
+    protected PIDController controller;
+
+
 
     /** Constructor for the abstract reactor class
      *
@@ -24,7 +31,7 @@ public abstract class Reactor {
      * @author Alex
      * @author Dylan
      */
-    public Reactor(double volume, double initialFlow, Reaction reaction, double[] initialConcentrations, double[] inletConcentrations) throws NullPointerException, IllegalArgumentException {
+    public Reactor(double volume, double initialFlow, Reaction reaction, double[] initialConcentrations, double[] inletConcentrations, int controlled, PIDController controller) throws NullPointerException, IllegalArgumentException {
 
         if(reaction==null) throw new IllegalArgumentException("A reaction is needed to initialize the reactor");
         this.reaction= reaction.clone();
@@ -52,6 +59,10 @@ public abstract class Reactor {
         for(int i=0;i<initialConcentrations.length; i++){
             this.initialConcentrations[i] = initialConcentrations[i];
         }
+        this.controlled = controlled;
+        this.currFlow = initialFlow;
+        this.currSpeciesNumber = 0;
+        this.controller = controller;
 
     }
 
@@ -244,16 +255,6 @@ public abstract class Reactor {
         return true;
 
     }
-    //not sure if we want this abstract method here
-    /** Simulation method for change in reactor concentration over time step
-     *
-     * @param timeStep time step
-     * @param flowRate updated flow rate
-     * @param currentConcentrations current concentrations
-     * @param currentSpeciesNumber current species to simulate
-     * @return change in reactor concentration over time step
-     * @author Alex
-     * @author Dylan
-     */
-    public abstract double simulateStep(double timeStep,double flowRate, double[] currentConcentrations, int currentSpeciesNumber);
+
+
 }
