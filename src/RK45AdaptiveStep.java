@@ -45,6 +45,7 @@ public class RK45AdaptiveStep {
         double[] valueForK6 = new double[n];
         boolean valid = false;
 
+
         do {
             for (int i = 0; i<n; i++) {
                 K1[i] = wholeTimeStep * equation.apply(x, y[], timeStep, i);
