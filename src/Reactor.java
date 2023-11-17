@@ -5,18 +5,18 @@
  */
 public abstract class Reactor implements Controllable, DifferentialEquation {
 
-    protected double volume;
-    protected Reaction reaction;
-    protected double[] inletConcentrations;
+    private double volume;
+    private Reaction reaction;
+    private double[] inletConcentrations;
 
-    protected double[] initialConcentrations;
+    private double[] initialConcentrations;
 
-    protected double initialFlow;
+    private double initialFlow;
 
-    protected int controlled;
-    protected double currFlow;
-    protected int currSpeciesNumber;
-    protected PIDController controller;
+    private int controlled;
+    private double currentFlowRate;
+    private int currSpeciesNumber;
+    private PIDController controller;
 
 
 

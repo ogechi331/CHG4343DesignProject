@@ -135,26 +135,34 @@ public class CSTRReactor extends Reactor {
         initialFlow = var;
     }
 
-
+    /** Applied function to calculate in RK45
+     *
+     * @param t time
+     * @param y array of ys for time t
+     * @param timeStep initial timeStep to use
+     * @param i which differential equation value to provide, in this case currentSpeciesNumber
+     * @return Rate of change of the dependent variable with respect to the independent variable, here is change in concentration
+     */
     @Override
-    public double apply(double x, double y) {
+    public double apply(double t, double[] y, double timeStep, int i) {
         double reactionRate = 0;
-        try {
-            reactionRate = reaction.calculateReactionRate(inletConcentrations, currSpeciesNumber);
+        double changeRate = 0;
+        double[] inletConcentrations = super.getInletConcentrations();
 
+        try {
+            reactionRate = super.getReaction().calculateReactionRate(y, i);
+
+            if (i > super.getReaction().getDelimeter()) { //product mass balance
+                changeRate = super.getCurrentFlowRate() * inletConcentrations[i] / super.getVolume() + reactionRate - super.getCurrentFlowRate() * y[i] / super.getVolume();
+            } else { //reactant mass balance
+                changeRate = super.getCurrentFlowRate() * y[i] / super.getVolume() - reactionRate - super.getCurrentFlowRate() * inletConcentrations[i] / super.getVolume();
+            }
         }
-        catch (IllegalArgumentException e) {
+
+       catch (IllegalArgumentException e) {
             System.out.println("Failed to simulate step: " + e.getMessage());
         }
-        if (currSpeciesNumber > reaction.getDelimeter()){ //product mass balance
-            return initialFlow*initialConcentrations[currSpeciesNumber]/volume + reactionRate - initialFlow*inletConcentrations[currSpeciesNumber]/volume;
-        }
-        //reactant mass balance
-        double changeRate =  initialFlow*initialConcentrations[currSpeciesNumber]/volume - reactionRate - initialFlow*inletConcentrations[currSpeciesNumber]/volume;
-        if(changeRate < 0) changeRate = 0;
 
-        //change the species number for the next call of apply
-        currSpeciesNumber = currSpeciesNumber + 1 < inletConcentrations.length-1? currSpeciesNumber+1 : 0;
         return changeRate;
     }
 }
