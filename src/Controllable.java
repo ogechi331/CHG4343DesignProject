@@ -1,3 +1,7 @@
+/** Interface for controllable classes
+ * @author Ogechi
+ * @version 1.0
+ */
 public interface Controllable {
 
     /**Returns true if the Controllable object is set to be controlled and false otherwise
@@ -33,7 +37,6 @@ public interface Controllable {
     void setManipulatedVariable(double var);
 
     /**Obtains the output of the Controllable object after a time step.
-     *
      * WARNING: This method is responsible for updating the current state of the Controllable object.
      * @param t0
      * @param t
