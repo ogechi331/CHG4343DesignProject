@@ -1,5 +1,6 @@
 /** Class for PID control loops for transient processes
  * @author Dylan
+ * @author Ogechi
  * @version 2.0
  */
 public class PIDController {
