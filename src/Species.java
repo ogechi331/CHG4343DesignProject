@@ -13,6 +13,7 @@ public class Species implements Cloneable{
      * @param coefficient reaction equation coefficient for the species
      * @author Ogechi
      */
+
     public Species(String name, int coefficient){
         this.name = name;
         this.coefficient = coefficient;

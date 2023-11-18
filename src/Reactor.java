@@ -5,20 +5,20 @@
  */
 public abstract class Reactor implements Controllable, DifferentialEquation {
 
-    private double volume;
-    private Reaction reaction;
-    private double[] inletConcentrations;
+    private double volume; //reactor volume
+    private Reaction reaction; //reaction taking place
+    private double[] inletConcentrations; //inlet concentrations
 
-    private double[] initialConcentrations;
+    private double[] initialConcentrations; //initial concentrations in the reactor
 
-    private double initialFlow;
+    private double[] currentConcentrations; //current concentrations in the reactor
+
+    private double initialFlow; //initial flow rate
 
     private int controlled;
-    private double currentFlowRate;
-    private int currSpeciesNumber;
+    private double currentFlow; //current flow rate
+    private int currentSpeciesNumber; //
     private PIDController controller;
-
-
 
     /** Constructor for the abstract reactor class
      *
@@ -31,7 +31,7 @@ public abstract class Reactor implements Controllable, DifferentialEquation {
      * @author Alex
      * @author Dylan
      */
-    public Reactor(double volume, double initialFlow, Reaction reaction, double[] initialConcentrations, double[] inletConcentrations, int controlled, PIDController controller) throws NullPointerException, IllegalArgumentException {
+    public Reactor(double volume, double initialFlow, Reaction reaction, double[] initialConcentrations, double[] inletConcentrations, int controlled, PIDController controller) {
 
         if(reaction==null) throw new IllegalArgumentException("A reaction is needed to initialize the reactor");
         this.reaction= reaction.clone();
@@ -60,8 +60,11 @@ public abstract class Reactor implements Controllable, DifferentialEquation {
             this.initialConcentrations[i] = initialConcentrations[i];
         }
         this.controlled = controlled;
-        this.currFlow = initialFlow;
-        this.currSpeciesNumber = 0;
+        this.currentFlow = initialFlow;
+        for (int i =0; i<initialConcentrations.length;i++) {
+            this.currentConcentrations[i]=initialConcentrations[i];
+        }
+        this.currentSpeciesNumber = 0;
         this.controller = controller;
 
     }
@@ -73,18 +76,22 @@ public abstract class Reactor implements Controllable, DifferentialEquation {
      * @author Alex
      * @author Dylan
      */
-    public Reactor(Reactor source) throws IllegalArgumentException {
+    public Reactor(Reactor source)  {
         if (source==null) throw new IllegalArgumentException("Error, copy of null PIDController object");
 
         this.reaction= reaction.clone();
         this.volume=source.volume;
         this.initialFlow=source.initialFlow;
+        this.currentFlow=source.currentFlow;
 
         for(int i=0;i<initialConcentrations.length; i++){
             this.initialConcentrations[i] = source.initialConcentrations[i];
         }
         for(int i=0;i<inletConcentrations.length; i++){
             this.inletConcentrations[i] = source.inletConcentrations[i];
+        }
+        for (int i=0; i<source.currentConcentrations.length;i++) {
+            this.currentConcentrations[i] = source.currentConcentrations[i];
         }
     }
 
@@ -95,7 +102,7 @@ public abstract class Reactor implements Controllable, DifferentialEquation {
      * @author Alex
      * @author Dylan
      */
-    public abstract Reactor clone() throws IllegalArgumentException;
+    public abstract Reactor clone();
 
     /** Accessor method for reactor volume
      *
@@ -221,6 +228,117 @@ public abstract class Reactor implements Controllable, DifferentialEquation {
             if (initialConcentrations[i]<0) return false;
         }
         this.initialConcentrations = initialConcentrations;
+        return true;
+    }
+
+    /** Accessor method for current flow rate
+     *
+     * @return current flow rate
+     * @author Dylan
+     */
+    public double getCurrentFlow() {
+        return this.currentFlow;
+    }
+
+    /** Mutator method for current flow rate
+     *
+     * @param currentFlow current flow rate
+     * @return true if updated and false if not
+     * @author Dylan
+     */
+    public boolean setCurrentFlowRate(double currentFlow) {
+        if (currentFlow<0) return false;
+        this.currentFlow=currentFlow;
+        return true;
+    }
+
+    /** Accessor method for controller
+     *
+     * @return copy of controller object
+     * @author Dylan
+     */
+    public PIDController getController() {
+        return this.controller.clone();
+    }
+
+    /** Mutator method for controller
+     *
+     * @param controller controller object
+     * @return true if updated and false if not
+     * @author Dylan
+     */
+    public boolean setController(PIDController controller) {
+        if (controller==null) return false;
+        this.controller=controller.clone();
+        return true;
+    }
+
+    /**  Accessor method for current species number
+     *
+     * @return current species number
+     * @author Dylan
+     */
+    public int getCurrentSpeciesNumber() {
+        return this.currentSpeciesNumber;
+    }
+
+    /** Mutator method for current species number
+     *
+     * @param currentSpeciesNumber current species number
+     * @return true when updated
+     */
+    public boolean setCurrentSpeciesNumber(int currentSpeciesNumber) {
+        this.currentSpeciesNumber=currentSpeciesNumber;
+        return true;
+    }
+
+    /** Accessor method for controlled
+     *
+     * @return controlled
+     * @author Dylan
+     */
+    public int getControlled(){
+        return this.controlled;
+    }
+
+    /** Mutator method for controlled
+     *
+     * @param controlled
+     * @return true when updated
+     * @author Dylan
+     */
+    public boolean setControlled(int controlled) {
+        this.controlled=controlled;
+        return true;
+    }
+
+    /** Accessor method for current concentrations
+     *
+     * @return array of current concentrations
+     * @author Dylan
+     */
+    public double[] getCurrentConcentrations() {
+        double[] currentConcentrations = new double[this.currentConcentrations.length];
+        for (int i=0; i<this.currentConcentrations.length; i++) {
+            currentConcentrations[i] = this.currentConcentrations[i];
+        }
+        return currentConcentrations;
+    }
+
+    /** Mutator method for current concentrations
+     *
+     * @param currentConcentrations array of current concentrations
+     * @return true if updated, false if not updated
+     * @author Dylan
+     */
+    public boolean setCurrentConcentrations(double[] currentConcentrations) {
+        if (currentConcentrations==null) return false;
+        for (int i=0;i<currentConcentrations.length;i++) {
+            if (currentConcentrations[i]<0 ) return false;
+        }
+        for (int i =0;i<currentConcentrations.length;i++) {
+            this.currentConcentrations[i] =currentConcentrations[i];
+        }
         return true;
     }
 

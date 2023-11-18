@@ -13,6 +13,7 @@ public class SinglyLinkedList <E> {
             this.next = next;
         }
 
+
         public void setElement(E newElem) {
             element = newElem;
         }

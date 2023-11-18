@@ -4,8 +4,8 @@
  * @author Ogechi
  * @version 2.2
  */
-public class CSTRReactor extends Reactor {
-    private int currSpeciesNumber;
+public class CSTRReactor extends Reactor implements DifferentialEquation{
+
     /** Constructor for CSTR reactor
      *
      * @param V reactor volume
@@ -17,10 +17,10 @@ public class CSTRReactor extends Reactor {
      * @author Alex
      * @author Dylan
      */
-    public CSTRReactor(double V, double initialFlow, Reaction reaction, double[] initialConcentrations, double[] inletConcentrations) throws IllegalArgumentException{
+    public CSTRReactor(double V, double initialFlow, Reaction reaction, double[] initialConcentrations, double[] inletConcentrations) {
         super(V, initialFlow, reaction, initialConcentrations, inletConcentrations, 0, null);
     }
-    public CSTRReactor(double V, double initialFlow, Reaction reaction, double[] initialConcentrations, double[] inletConcentrations, int controlled, PIDController controller) throws IllegalArgumentException{
+    public CSTRReactor(double V, double initialFlow, Reaction reaction, double[] initialConcentrations, double[] inletConcentrations, int controlled, PIDController controller) {
         super(V, initialFlow, reaction, initialConcentrations, inletConcentrations, controlled, controller);
     }
 
@@ -31,7 +31,7 @@ public class CSTRReactor extends Reactor {
      * @author Alex
      * @author Dylan
      */
-    public CSTRReactor(CSTRReactor source) throws IllegalArgumentException {
+    public CSTRReactor(CSTRReactor source) {
         super(source);
     }
 
@@ -42,7 +42,7 @@ public class CSTRReactor extends Reactor {
      * @author Alex
      * @author Dylan
      */
-    public CSTRReactor clone() throws IllegalArgumentException {
+    public CSTRReactor clone() {
         try{
             return new CSTRReactor(this);
         } catch(IllegalArgumentException e){
@@ -95,28 +95,28 @@ public class CSTRReactor extends Reactor {
     }
 
 
-    public double[] getSystemOutput(double t, double endTime) {
-        int n = inletConcentrations.length;
-        this.currSpeciesNumber = 0;
+    public double[] getSystemOutput(double t, double timeStep, double tolerance) {
+        int n = super.getInletConcentrations().length;
+        super.setCurrentSpeciesNumber(0);
         DifferentialEquation[] equations =  new DifferentialEquation[n];
         for (int i =0; i<n; i++){
             equations[i] = this;
         }
-        double[][] solution = RK4Solver.solve(t, inletConcentrations, endTime, equations);
-        int j = solution.length -2;
-        System.arraycopy(solution[j], 0, inletConcentrations, 0, n);
-        return solution[j];
+        double[] solution = RK45AdaptiveStep.solve(t, super.getCurrentConcentrations(), timeStep, equations, tolerance);
+
+        return solution;
 
     }
 
     @Override
     public boolean isControlled() {
-        return controller != null;
+        return super.getController() != null;
     }
 
     @Override
     public double getControlledVar() {
-        return inletConcentrations[controlled];
+        double[] inletConcentrations = super.getInletConcentrations();
+        return inletConcentrations[super.getControlled()];
     }
 
 
@@ -127,12 +127,12 @@ public class CSTRReactor extends Reactor {
 
     @Override
     public PIDController getController() {
-        return this.controller.clone();
+        return super.getController().clone();
     }
 
     @Override
     public void setManipulatedVariable(double var) {
-        initialFlow = var;
+        super.setInitialFlow(var);
     }
 
     /** Applied function to calculate in RK45
@@ -153,9 +153,9 @@ public class CSTRReactor extends Reactor {
             reactionRate = super.getReaction().calculateReactionRate(y, i);
 
             if (i > super.getReaction().getDelimeter()) { //product mass balance
-                changeRate = super.getCurrentFlowRate() * inletConcentrations[i] / super.getVolume() + reactionRate - super.getCurrentFlowRate() * y[i] / super.getVolume();
+                changeRate = super.getCurrentFlow() * inletConcentrations[i] / super.getVolume() + reactionRate - super.getCurrentFlow() * y[i] / super.getVolume();
             } else { //reactant mass balance
-                changeRate = super.getCurrentFlowRate() * y[i] / super.getVolume() - reactionRate - super.getCurrentFlowRate() * inletConcentrations[i] / super.getVolume();
+                changeRate = super.getCurrentFlow() * y[i] / super.getVolume() - reactionRate - super.getCurrentFlow() * inletConcentrations[i] / super.getVolume();
             }
         }
 

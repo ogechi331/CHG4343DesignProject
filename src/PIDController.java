@@ -1,20 +1,43 @@
-/** Abstract parent class for PID control loops for transient processes
+/** Class for PID control loops for transient processes
  * @author Dylan
- * @version 1.3
+ * @version 2.0
  */
-public class PIDController extends Controller{
+public class PIDController {
 
     public enum CONTROLLER_TYPE {P, PI, PD, I, ID, D, PID}; //type of controller to use
 
-    protected double startTime; //normally 0
-    protected double endTime; //greater than startTime
-    protected double timeStep; //needs to be big enough to make at least one time step between start and end time
-    protected double controllerGain; //K_C
-    protected double integratingTimeConstant; //𝛕_I
-    protected double derivativeTimeConstant;//𝛕_D
-    protected double numberOfSteps; //calculated from above not given directly
+    private double startTime; //normally 0
+    private double endTime; //greater than startTime
+    private double timeStep; //needs to be big enough to make at least one time step between start and end time
+    private double controllerGain; //K_C
+    private double integratingTimeConstant; //𝛕_I
+    private double derivativeTimeConstant;//𝛕_D
+    private double numberOfSteps; //calculated from above not given directly
+    private CONTROLLER_TYPE controllerType; //controller type in use
+    private double tolerance; //tolerance for error between RK4 and RK5 method
+    private double g_P; //proportional part of the controller
+    private double g_I; //integrating part of the controller
+    private double g_pastI; //past integrating part of the controller
+    private double g_D; //derivative part of the controller
+    private double g_pastD; //past derivative part of the controller
+    private double g_processVariable;
+    private double g_setPoint;
+    private double g_output;
+    private double deadTime; //dead time
 
-    protected CONTROLLER_TYPE controllerType; //controller type in use
+    /*Array holding Simulation results each row contains the simulation values at the given time
+     * simulation[0] : Time
+     * simulation[1 to n-5]: controllable output values
+     * simulation[n-4] : manipulated variable
+     * simulation [n-3] : P
+     * simulation [n-2] : I
+     * simulation [n-1] : D
+     *
+      */
+    private double[][] g_simulation;
+    private double g_previousTime;
+
+    private Controllable controllable;
 
     /** Constructor for the abstract PID controller class
      *
@@ -25,14 +48,18 @@ public class PIDController extends Controller{
      * @param integratingTimeConstant controller integrating time constant
      * @param derivativeTimeConstant controller derivative time constant
      * @param controllerType controller type which must be a type of PID or uncontrolled
-     * @throws IllegalArgumentException if end time is before start time or time step is too large for the range given (<1 step) or if controller type is null
+     * @param deadTime dead time for PID controller
+     * @param tolerance tolerance for error between RK4 and RK5 method
+     * @throws IllegalArgumentException if end time is before start time or time step is too large for the range given (<1 step) or if controller type is null or if dead time is negative or if tolerance not greater than 0
      * @author Dylan
      */
-    public PIDController(double startTime, double endTime, double timeStep, double controllerGain, double integratingTimeConstant, double derivativeTimeConstant, CONTROLLER_TYPE controllerType) throws IllegalArgumentException {
+    public PIDController(double startTime, double endTime, double timeStep, double controllerGain, double integratingTimeConstant, double derivativeTimeConstant, CONTROLLER_TYPE controllerType, double deadTime, Controllable controllable, double tolerance) {
 
         if (controllerType==null) throw new IllegalArgumentException("Controller type cannot be null");
         if (endTime<startTime) throw new IllegalArgumentException("Error end time must be larger than start time");
         if (timeStep>(endTime-startTime)) throw new IllegalArgumentException("Error time step is too large for time range");
+        if (deadTime<0) throw new IllegalArgumentException("Dead time must be greater than or equal to 0");
+        if (tolerance<0 || tolerance==0) throw new IllegalArgumentException("Tolerance must be greater than 0");
 
         this.startTime = startTime;
         this.endTime = endTime;
@@ -42,6 +69,10 @@ public class PIDController extends Controller{
         this.derivativeTimeConstant = derivativeTimeConstant;
         this.numberOfSteps = (int)Math.ceil((this.endTime-this.startTime)/this.timeStep)+1;
         this.controllerType = controllerType;
+        this.deadTime = deadTime;
+        this.controllable = controllable;
+        this.tolerance=tolerance;
+        resetGlobalVariables();
     }
 
     /** Copy constructor for the abstract PID controller class
@@ -50,7 +81,7 @@ public class PIDController extends Controller{
      * @throws IllegalArgumentException if o object to copy is null
      * @author Dylan
      */
-    public PIDController(PIDController source) throws IllegalArgumentException {
+    public PIDController(PIDController source) {
         if (source==null) throw new IllegalArgumentException("Error, copy of null PIDController object");
 
         this.startTime=source.startTime;
@@ -61,6 +92,17 @@ public class PIDController extends Controller{
         this.derivativeTimeConstant=source.derivativeTimeConstant;
         this.numberOfSteps=source.numberOfSteps;
         this.controllerType=source.controllerType;
+        this.deadTime=source.deadTime;
+        this.tolerance=source.tolerance;
+        this.g_P=source.g_P;
+        this.g_I=source.g_I;
+        this.g_pastI=source.g_pastI;
+        this.g_D=source.g_D;
+        this.g_pastD=source.g_pastD;
+        this.g_processVariable=source.g_processVariable;
+        this.g_setPoint=source.g_setPoint;
+        this.g_output=source.g_output;
+        //TODO add simulation and previous time
     }
 
     /** Clone method to call the copy constructor
@@ -69,9 +111,13 @@ public class PIDController extends Controller{
      * @throws IllegalArgumentException if o object to copy is null
      * @author Dylan
      */
-    public PIDController clone() throws IllegalArgumentException{
-        throw new UnsupportedOperationException();
-    };
+    public PIDController clone() {
+        try{
+            return new PIDController(this);
+        } catch(IllegalArgumentException e){
+            throw new IllegalArgumentException("Failed to clone CSTRControllerPID: "+ e.getMessage());
+        }
+    }
 
     /** Accessor method for start time
      *
@@ -208,7 +254,6 @@ public class PIDController extends Controller{
         this.derivativeTimeConstant = derivativeTimeConstant;
         return true;
     }
-
     /** Accessor method for controller type
      *
      * @return controller type
@@ -229,6 +274,44 @@ public class PIDController extends Controller{
         this.controllerType = controllerType;
         return true;
     }
+
+    /** Accessor method for dead time, theta
+     *
+     * @return dead time, theta
+     * @author Dylan
+     */
+    public double getDeadTime() {
+        return this.deadTime;
+    }
+
+    /** Mutator method for dead time, theta
+     *
+     * @param deadTime dead time, must be greater than or equal to 0
+     * @return true if updated and false if not
+     * @author Dylan
+     */
+    public boolean setDeadTime (double deadTime) {
+        if (deadTime<0) return false;
+        this.deadTime=deadTime;
+        return true;
+    }
+
+    /** Reset method for global variables
+     * @author Dylan
+     */
+    protected void resetGlobalVariables() {
+        this.g_P=0;
+        this.g_I=0;
+        this.g_pastI=0;
+        this.g_D=0;
+        this.g_pastD=0;
+        this.g_processVariable=0;
+        this.g_setPoint=0;
+        this.g_output=0;
+        this.g_previousTime=0;
+        //TODO add simulation
+    }
+
     /** Equals method
      *
      * @param comparator object to compare to current object
@@ -246,6 +329,18 @@ public class PIDController extends Controller{
         if (specificComparator.controllerGain!=this.controllerGain) return false;
         if (specificComparator.integratingTimeConstant!=this.integratingTimeConstant) return false;
         if (specificComparator.derivativeTimeConstant!=this.derivativeTimeConstant) return false;
+        if (specificComparator.deadTime!=this.deadTime) return false;
+        if (specificComparator.tolerance!=this.tolerance) return false;
+        if (specificComparator.g_P!=this.g_P) return false;
+        if (specificComparator.g_I!=this.g_I) return false;
+        if (specificComparator.g_pastI!=this.g_pastI) return false;
+        if (specificComparator.g_D!=this.g_D) return false;
+        if (specificComparator.g_pastD!=this.g_pastD) return false;
+        if (specificComparator.g_processVariable!=this.g_processVariable) return false;
+        if (specificComparator.g_setPoint!=this.g_setPoint) return false;
+        if (specificComparator.g_output!=this.g_output) return false;
+        if (specificComparator.g_previousTime!=this.g_previousTime) return false;
+        //TODO add simulation
 
         return true;
     }
@@ -257,9 +352,11 @@ public class PIDController extends Controller{
      * @author Ogechi
      */
     public void simulateProportionalStep(double error) {
-        if(controllerType == CONTROLLER_TYPE.P || controllerType == CONTROLLER_TYPE.PD || controllerType == CONTROLLER_TYPE.PID) {
-            P =this.controllerGain*error;
-        } else{ P = 0;}
+        if(controllerType == CONTROLLER_TYPE.P || controllerType == CONTROLLER_TYPE.PD || controllerType == CONTROLLER_TYPE.PI || controllerType == CONTROLLER_TYPE.PID) {
+            g_P =this.controllerGain*error;
+        } else {
+            g_P = 0;
+        }
     }
 
     /** Simulation for integral part of PID controller function for steps i>0 steps
@@ -269,9 +366,11 @@ public class PIDController extends Controller{
      * @author Ogechi
      */
     public void simulateIntegralStep(double error) {
-        if(controllerType == CONTROLLER_TYPE.I || controllerType == CONTROLLER_TYPE.PI || controllerType ==CONTROLLER_TYPE.ID || controllerType == CONTROLLER_TYPE.PID){
-            I = pastI+((this.controllerGain/this.integratingTimeConstant)*error*this.timeStep);
-        }else{ I = 0;}
+        if(controllerType == CONTROLLER_TYPE.I || controllerType == CONTROLLER_TYPE.PI || controllerType == CONTROLLER_TYPE.ID || controllerType == CONTROLLER_TYPE.PID){
+            g_I = g_pastI+((this.controllerGain/this.integratingTimeConstant)*error*this.timeStep);
+        } else {
+            g_I = 0;
+        }
     }
 
     /** Simulation for derivative part of PID controller function for steps i>0 steps
@@ -282,26 +381,120 @@ public class PIDController extends Controller{
      */
     public void simulateDerivativeStep(double currentValue) {
         if(controllerType == CONTROLLER_TYPE.D || controllerType == CONTROLLER_TYPE.PD || controllerType == CONTROLLER_TYPE.ID || controllerType == CONTROLLER_TYPE.PID){
-            D = -this.controllerGain*this.derivativeTimeConstant*((currentValue-pastD)/this.timeStep);
-            pastD = currentValue;
-        }else{D = 0;}
+            g_D = -this.controllerGain*this.derivativeTimeConstant*((currentValue-g_pastD)/this.timeStep);
+            g_pastD = currentValue;
+        } else {
+            g_D = 0;
+        }
     }
-
 
     /** Calculates the controller output for a given object
      *
      * @param object Object that implements Controllable
      * @return value of the controlled variable
      * @author Ogechi
+     * @author Dylan
      */
     public double compute(Controllable object){
-        double error = setPoint - processVariable;
+        double error = this.g_setPoint - this.g_processVariable;
         simulateProportionalStep(error);
         simulateIntegralStep(error);
         simulateDerivativeStep(error);
-        pastI = I;
-        pastD = processVariable;
-        return P + I + D > 0 ? P + I + D: 0;
+        this.g_pastI = this.g_I;
+        this.g_pastD = this.g_processVariable;
+        return this.g_P + this.g_I + this.g_D > 0 ? this.g_P + this.g_I + this.g_D: 0;
     }
+
+    /** Method to simulate PID controller
+     * @author Ogechi
+     * @author Dylan
+     */
+    public void simulate(){
+
+        if(this.controllable.isControlled()){
+            //number of variables to store
+            int n = this.controllable.getInitialValues().length + 5;
+            Queue<double[]> queue = new Queue<>();
+
+            this.g_simulation = new double[(int)this.numberOfSteps][n];
+            double error;
+            double[] temp;
+
+            //initialize the first row with initial values
+            this.g_simulation[0][0] = this.startTime;
+            for(int i = 0; i < this.controllable.getInitialValues().length; i++){
+                this.g_simulation[0][i+1] = this.controllable.getInitialValues()[i];
+            }
+            this.g_simulation[0][n-4] = this.g_processVariable;
+            this.g_simulation[0][n-3] = this.g_P;
+            this.g_simulation[0][n-2] = this.g_I;
+            this.g_simulation[0][n-1] = this.g_D;
+
+            this.g_processVariable = this.controllable.getControlledVar();
+            this.g_output = this.compute(this.controllable);
+            queue.enqueue(new double[]{this.g_previousTime + this.deadTime,this.g_output});
+
+            int step = 1;
+
+            while (step < numberOfSteps){
+                error = this.g_processVariable - this.g_setPoint;
+                this.g_simulation[step][0] = this.g_previousTime + this.timeStep;
+                temp = this.controllable.getSystemOutput(this.g_previousTime, this.g_previousTime + this.timeStep, this.tolerance);
+                for (int i = 0; i < n-5; i++) {
+                    this.g_simulation[step][i+1] = temp[i];
+                }
+
+                //check if controlled action takes place, if not then equal to prev
+                if(queue.peek()[0]>= this.g_previousTime) {
+                    this.g_simulation[step][n - 4] = queue.peek()[1];
+                    this.controllable.setManipulatedVariable(queue.peek()[1]);
+                    queue.dequeue();
+                }else{
+                    this.g_simulation[step][n-4] =  this.g_simulation[n-4][step-1];
+                }
+
+                this.simulateProportionalStep(error);
+                this.simulateIntegralStep(error);
+                this.simulateDerivativeStep(this.g_processVariable);
+
+                //store PID values in simulation
+                this.g_simulation[step][n-3] = this.g_P;
+                this.g_simulation[step][n-2] = this.g_I;
+                this.g_simulation[step][n-1] = this.g_D;
+
+                this.g_processVariable = controllable.getControlledVar();
+                this.g_output = this.compute(controllable);
+
+                //enqueue the controller action
+                queue.enqueue(new double[]{this.g_previousTime + this.deadTime, this.g_output});
+                this.g_previousTime += timeStep;
+                step++;
+            }
+        } else {
+            int n = this.controllable.getInitialValues().length+ 1;
+            this.g_simulation = new double[n][(int)this.numberOfSteps];
+
+            //store initial values in simulation
+            this.g_simulation[0][0] = this.g_previousTime;
+            for(int i = 0; i < controllable.getInitialValues().length; i++){
+                this.g_simulation[0][i+1] = controllable.getInitialValues()[i];
+            }
+            int step = 1;
+            double[] temp;
+
+            while(step <numberOfSteps){
+
+                this.g_simulation[step][0] = this.g_previousTime;
+                temp = this.controllable.getSystemOutput(this.g_previousTime, this.g_previousTime + this.timeStep, this.tolerance);
+                for (int i = 0; i < n-5; i++) {
+                    this.g_simulation[step][i+1] = temp[i];
+                }
+                this.g_previousTime += this.timeStep;
+
+                step++;
+            }
+        }
+    }
+
 
 } //end of class
