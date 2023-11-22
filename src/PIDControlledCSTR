@@ -1,0 +1,25 @@
+header : Time, CA, CB, v0, P, I, D
+populate to file : C:\Users\Ogechi\IdeaProjects\CHG4343DesignProject\src\PIDControlledCSTRResults
+
+volume : 1
+initial flow : 0.05
+initial concentrations : 0.2, 0
+inlet concentrations : 0.2, 0
+controlled : 0
+is controlled : true
+
+reaction equation : A -> B
+k : 0.2
+
+controller type : PID
+start time : -0.1
+end time : 50
+time step : 1
+controller gain : 9.4375
+integrating time constant : 1.807836
+derivative time constant : 0.27027
+tolerance : 0.01
+set point : 0.04
+dead time: 0
+disturbances : 10, 1.2
+

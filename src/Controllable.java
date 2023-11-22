@@ -4,12 +4,6 @@
  */
 public interface Controllable {
 
-    /**Returns true if the Controllable object is set to be controlled and false otherwise
-     *
-     * @return boolean state of Controlled object
-     * @author Ogechi
-     */
-    boolean isControlled();
 
     /**Returns the value of a Controllable object's controlled variable
      * @return Controlled variable as double
@@ -24,11 +18,12 @@ public interface Controllable {
      */
     double[] getInitialValues();
 
-    /**Obtains the Controller of the Controllable object
-     * @return PIDController
+    /***Returns true if the Controllable object is set to be controlled and false otherwise
+     *
+     * @return boolean state of Controlled object
      * @author Ogechi
      */
-    PIDController getController();
+    boolean getIsControlled();
 
     /**Updates the value of the Manipulated Variable in the Controllable object
      * @param var value of the updated Manipulated Variable
@@ -45,5 +40,6 @@ public interface Controllable {
      * @author Dylan
      */
     double[] getSystemOutput(double t, double timeStep, double tolerance);
+    void simulateDisturbance(double dist);
     //void tunePIDParameters(); -> bonus
 }

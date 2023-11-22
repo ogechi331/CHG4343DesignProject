@@ -1,0 +1,18 @@
+header : Time, CA, CB
+populate to file : C:\Users\Ogechi\IdeaProjects\CHG4343DesignProject\src\UncontrolledCSTRResults
+
+volume : 1
+initial flow : 0.05
+initial concentrations : 0.2, 0
+inlet concentrations : 0.2, 0
+controlled : 0
+is controlled : false
+reaction equation : A -> B
+k : 0.2
+start time : -0.1
+end time : 50
+time step : 1
+tolerance : 0.01
+
+
+

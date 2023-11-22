@@ -17,6 +17,7 @@ public class Queue<E>{
     public E peek(){
         return this.queue.getFirst().getElement();
     }
+    public boolean isEmpty(){return queue.isEmpty();}
 
 
 

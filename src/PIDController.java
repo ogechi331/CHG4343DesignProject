@@ -5,7 +5,10 @@
  */
 public class PIDController {
 
-    public enum CONTROLLER_TYPE {P, PI, PD, I, ID, D, PID}; //type of controller to use
+    public enum CONTROLLER_TYPE {
+        UNCONTROLLED, P, PI, PD, I, ID, D, PID
+
+    } //type of controller to use
 
     private double startTime; //normally 0
     private double endTime; //greater than startTime
@@ -26,19 +29,10 @@ public class PIDController {
     private double g_output;
     private double deadTime; //dead time
 
-    /*Array holding Simulation results each row contains the simulation values at the given time
-     * simulation[0] : Time
-     * simulation[1 to n-5]: controllable output values
-     * simulation[n-4] : manipulated variable
-     * simulation [n-3] : P
-     * simulation [n-2] : I
-     * simulation [n-1] : D
-     *
-      */
-    private double[][] g_simulation;
     private double g_previousTime;
 
     private Controllable controllable;
+    private Queue<double[]> disturbances;
 
     /** Constructor for the abstract PID controller class
      *
@@ -54,7 +48,7 @@ public class PIDController {
      * @throws IllegalArgumentException if end time is before start time or time step is too large for the range given (<1 step) or if controller type is null or if dead time is negative or if tolerance not greater than 0
      * @author Dylan
      */
-    public PIDController(double startTime, double endTime, double timeStep, double controllerGain, double integratingTimeConstant, double derivativeTimeConstant, CONTROLLER_TYPE controllerType, double deadTime, Controllable controllable, double tolerance) {
+    public PIDController(double startTime, double endTime, double timeStep, double controllerGain, double integratingTimeConstant, double derivativeTimeConstant, CONTROLLER_TYPE controllerType, double deadTime, Controllable controllable, double tolerance, Queue<double[]> disturbances, double g_setPoint) {
 
         if (controllerType==null) throw new IllegalArgumentException("Controller type cannot be null");
         if (endTime<startTime) throw new IllegalArgumentException("Error end time must be larger than start time");
@@ -73,7 +67,10 @@ public class PIDController {
         this.deadTime = deadTime;
         this.controllable = controllable;
         this.tolerance=tolerance;
-        resetGlobalVariables();
+        this.disturbances = disturbances;
+        this.g_setPoint = g_setPoint;
+        this.g_previousTime = startTime;
+
     }
 
     /** Copy constructor for the abstract PID controller class
@@ -103,6 +100,7 @@ public class PIDController {
         this.g_processVariable=source.g_processVariable;
         this.g_setPoint=source.g_setPoint;
         this.g_output=source.g_output;
+        this.disturbances = source.disturbances; //needs to be correctly cloned later
         //TODO add simulation and previous time
     }
 
@@ -300,7 +298,7 @@ public class PIDController {
     /** Reset method for global variables
      * @author Dylan
      */
-    protected void resetGlobalVariables() {
+    protected void resetGlobalVariables() { //TODO: should we really reset P, I, D and setPoint?
         this.g_P=0;
         this.g_I=0;
         this.g_pastI=0;
@@ -310,7 +308,6 @@ public class PIDController {
         this.g_setPoint=0;
         this.g_output=0;
         this.g_previousTime=0;
-        //TODO add simulation
     }
 
     /** Equals method
@@ -383,7 +380,6 @@ public class PIDController {
     public void simulateDerivativeStep(double currentValue) {
         if(controllerType == CONTROLLER_TYPE.D || controllerType == CONTROLLER_TYPE.PD || controllerType == CONTROLLER_TYPE.ID || controllerType == CONTROLLER_TYPE.PID){
             g_D = -this.controllerGain*this.derivativeTimeConstant*((currentValue-g_pastD)/this.timeStep);
-            g_pastD = currentValue;
         } else {
             g_D = 0;
         }
@@ -400,7 +396,7 @@ public class PIDController {
         double error = this.g_setPoint - this.g_processVariable;
         simulateProportionalStep(error);
         simulateIntegralStep(error);
-        simulateDerivativeStep(error);
+        simulateDerivativeStep(object.getControlledVar());
         this.g_pastI = this.g_I;
         this.g_pastD = this.g_processVariable;
         return this.g_P + this.g_I + this.g_D > 0 ? this.g_P + this.g_I + this.g_D: 0;
@@ -410,91 +406,116 @@ public class PIDController {
      * @author Ogechi
      * @author Dylan
      */
-    public void simulate(){
+    public double[][] simulate(){
 
-        if(this.controllable.isControlled()){
+        /*Array holding Simulation results each row contains the simulation values at the given time
+         * simulation[0] : Time
+         * simulation[1 to n-5]: controllable output values
+         * simulation[n-4] : manipulated variable
+         * simulation [n-3] : P
+         * simulation [n-2] : I
+         * simulation [n-1] : D
+         *
+         */
+        double[][] g_simulation;
+        if(this.controllable.getIsControlled()){
             //number of variables to store
             int n = this.controllable.getInitialValues().length + 5;
             Queue<double[]> queue = new Queue<>();
 
-            this.g_simulation = new double[(int)this.numberOfSteps][n];
+            g_simulation = new double[(int) (this.numberOfSteps)][n];
             double error;
             double[] temp;
 
             //initialize the first row with initial values
-            this.g_simulation[0][0] = this.startTime;
+            g_simulation[0][0] = this.startTime;
             for(int i = 0; i < this.controllable.getInitialValues().length; i++){
-                this.g_simulation[0][i+1] = this.controllable.getInitialValues()[i];
+                g_simulation[0][i+1] = 0;
             }
-            this.g_simulation[0][n-4] = this.g_processVariable;
-            this.g_simulation[0][n-3] = this.g_P;
-            this.g_simulation[0][n-2] = this.g_I;
-            this.g_simulation[0][n-1] = this.g_D;
-
+            this.controllable.setManipulatedVariable(0);
             this.g_processVariable = this.controllable.getControlledVar();
-            this.g_output = this.compute(this.controllable);
-            queue.enqueue(new double[]{this.g_previousTime + this.deadTime,this.g_output});
+            simulateProportionalStep(g_setPoint - g_processVariable);
+
+            this.g_output = g_P;
+
+            g_simulation[0][n-4] = this.g_processVariable;
+            g_simulation[0][n-3] = this.g_P;
+            g_simulation[0][n-2] = this.g_I;
+            g_simulation[0][n-1] = this.g_D;
+
+
+
+
+            queue.enqueue(new double[]{this.g_previousTime + this.timeStep,this.g_output});
 
             int step = 1;
 
             while (step < numberOfSteps){
-                error = this.g_processVariable - this.g_setPoint;
-                this.g_simulation[step][0] = this.g_previousTime + this.timeStep;
+
+                g_simulation[step][0] = this.g_previousTime + this.timeStep;
+
+                //check if disturbance action takes place, if not then continue
+                if (!this.disturbances.isEmpty()){
+                    if(this.disturbances.peek()[0] <= this.g_previousTime + this.timeStep) {
+                        this.controllable.simulateDisturbance(disturbances.dequeue()[1]);
+                    }
+                }
+
+
                 temp = this.controllable.getSystemOutput(this.g_previousTime, this.g_previousTime + this.timeStep, this.tolerance);
                 for (int i = 0; i < n-5; i++) {
-                    this.g_simulation[step][i+1] = temp[i];
+                    g_simulation[step][i+1] = temp[i];
                 }
 
                 //check if controlled action takes place, if not then equal to prev
-                if(queue.peek()[0]>= this.g_previousTime) {
-                    this.g_simulation[step][n - 4] = queue.peek()[1];
-                    this.controllable.setManipulatedVariable(queue.peek()[1]);
-                    queue.dequeue();
+                //the controlled action queue should never become empty
+                if(queue.peek()[0] <= this.g_previousTime + this.timeStep) {
+                    g_simulation[step][n - 4] = queue.peek()[1];
+                    this.controllable.setManipulatedVariable(queue.dequeue()[1]);
                 }else{
-                    this.g_simulation[step][n-4] =  this.g_simulation[n-4][step-1];
+                    g_simulation[step][n-4] =  g_simulation[n-4][step-1];
                 }
-
-                this.simulateProportionalStep(error);
-                this.simulateIntegralStep(error);
-                this.simulateDerivativeStep(this.g_processVariable);
-
-                //store PID values in simulation
-                this.g_simulation[step][n-3] = this.g_P;
-                this.g_simulation[step][n-2] = this.g_I;
-                this.g_simulation[step][n-1] = this.g_D;
 
                 this.g_processVariable = controllable.getControlledVar();
                 this.g_output = this.compute(controllable);
+                //store PID values in simulation
+                g_simulation[step][n-3] = this.g_P;
+                g_simulation[step][n-2] = this.g_I;
+                g_simulation[step][n-1] = this.g_D;
+
+
 
                 //enqueue the controller action
-                queue.enqueue(new double[]{this.g_previousTime + this.deadTime, this.g_output});
                 this.g_previousTime += timeStep;
+                queue.enqueue(new double[]{this.g_previousTime + this.deadTime, this.g_output});
+
                 step++;
             }
         } else {
             int n = this.controllable.getInitialValues().length+ 1;
-            this.g_simulation = new double[n][(int)this.numberOfSteps];
+            g_simulation = new double[(int)this.numberOfSteps][n];
 
             //store initial values in simulation
-            this.g_simulation[0][0] = this.g_previousTime;
+            g_simulation[0][0] = this.g_previousTime;
             for(int i = 0; i < controllable.getInitialValues().length; i++){
-                this.g_simulation[0][i+1] = controllable.getInitialValues()[i];
+                g_simulation[0][i+1] = controllable.getInitialValues()[i];
             }
             int step = 1;
             double[] temp;
 
             while(step <numberOfSteps){
-
-                this.g_simulation[step][0] = this.g_previousTime;
                 temp = this.controllable.getSystemOutput(this.g_previousTime, this.g_previousTime + this.timeStep, this.tolerance);
-                for (int i = 0; i < n-5; i++) {
-                    this.g_simulation[step][i+1] = temp[i];
+                for (int i = 0; i < n-1; i++) {
+                    g_simulation[step][i+1] = temp[i];
                 }
                 this.g_previousTime += this.timeStep;
+                g_simulation[step][0] = this.g_previousTime;
 
                 step++;
             }
         }
+        resetGlobalVariables(); //TODO: verify if reset makes sense here, also reset var method
+        return g_simulation;
     }
 
 
