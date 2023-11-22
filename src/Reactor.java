@@ -7,7 +7,7 @@ public abstract class Reactor implements Controllable, DifferentialEquation {
 
     private double volume; //reactor volume
     private Reaction reaction; //reaction taking place
-    private double[] inletConcentrations; //inlet concentrations
+    private double[] inletConcentrations; //inlet concentrations -> what is this for then if it is not initial or current?
 
     private double[] initialConcentrations; //initial concentrations in the reactor
 
@@ -18,7 +18,7 @@ public abstract class Reactor implements Controllable, DifferentialEquation {
     private int controlled;
     private double currentFlow; //current flow rate
     private int currentSpeciesNumber; //
-    private PIDController controller;
+    private boolean isControlled;
 
     /** Constructor for the abstract reactor class
      *
@@ -31,7 +31,7 @@ public abstract class Reactor implements Controllable, DifferentialEquation {
      * @author Alex
      * @author Dylan
      */
-    public Reactor(double volume, double initialFlow, Reaction reaction, double[] initialConcentrations, double[] inletConcentrations, int controlled, PIDController controller) {
+    public Reactor(double volume, double initialFlow, Reaction reaction, double[] initialConcentrations, double[] inletConcentrations, int controlled, boolean isControlled) {
 
         if(reaction==null) throw new IllegalArgumentException("A reaction is needed to initialize the reactor");
         this.reaction= reaction.clone();
@@ -61,11 +61,12 @@ public abstract class Reactor implements Controllable, DifferentialEquation {
         }
         this.controlled = controlled;
         this.currentFlow = initialFlow;
+        this.currentConcentrations = new double[initialConcentrations.length];
         for (int i =0; i<initialConcentrations.length;i++) {
             this.currentConcentrations[i]=initialConcentrations[i];
         }
         this.currentSpeciesNumber = 0;
-        this.controller = controller;
+        this.isControlled = isControlled;
 
     }
 
@@ -252,24 +253,23 @@ public abstract class Reactor implements Controllable, DifferentialEquation {
         return true;
     }
 
-    /** Accessor method for controller
+    /** Accessor method for isControlled
      *
-     * @return copy of controller object
-     * @author Dylan
+     * @return boolean value of isControlled
+     * @author Ogechi
      */
-    public PIDController getController() {
-        return this.controller.clone();
+    public boolean getIsControlled() {
+        return isControlled;
     }
 
-    /** Mutator method for controller
+    /** Mutator method for isControlled
      *
-     * @param controller controller object
+     * @param isControlled
      * @return true if updated and false if not
-     * @author Dylan
+     * @author Ogechi
      */
-    public boolean setController(PIDController controller) {
-        if (controller==null) return false;
-        this.controller=controller.clone();
+    public boolean setIsControlled(boolean isControlled) {
+        this.isControlled = isControlled;
         return true;
     }
 

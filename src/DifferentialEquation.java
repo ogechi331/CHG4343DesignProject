@@ -14,10 +14,10 @@ public interface DifferentialEquation {
      * @param timeStep initial timeStep to use
      * @param i which differential equation value to provide
      * @return Rate of change of the dependent variable with respect to the independent variable.
-     * @see RK45AdaptiveStep
+     * @see RK45
      * @author Ogechi
      * @author Dylan
      */
-    double apply(double t, double[] y, double timeStep, int i);
+    double apply(double t, double y);
 
 }

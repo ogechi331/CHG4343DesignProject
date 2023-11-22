@@ -4,7 +4,8 @@
  * @author Ogechi
  * @version 2.2
  */
-public class CSTRReactor extends Reactor implements DifferentialEquation{
+public class CSTRReactor extends Reactor implements DifferentialEquation, Controllable{
+
 
     /** Constructor for CSTR reactor
      *
@@ -18,10 +19,10 @@ public class CSTRReactor extends Reactor implements DifferentialEquation{
      * @author Dylan
      */
     public CSTRReactor(double V, double initialFlow, Reaction reaction, double[] initialConcentrations, double[] inletConcentrations) {
-        super(V, initialFlow, reaction, initialConcentrations, inletConcentrations, 0, null);
+        super(V, initialFlow, reaction, initialConcentrations, inletConcentrations, 0, false);
     }
-    public CSTRReactor(double V, double initialFlow, Reaction reaction, double[] initialConcentrations, double[] inletConcentrations, int controlled, PIDController controller) {
-        super(V, initialFlow, reaction, initialConcentrations, inletConcentrations, controlled, controller);
+    public CSTRReactor(double V, double initialFlow, Reaction reaction, double[] initialConcentrations, double[] inletConcentrations, int controlled, boolean isControlled) {
+        super(V, initialFlow, reaction, initialConcentrations, inletConcentrations, controlled, isControlled);
     }
 
     /** Copy constructor for the CSTR reactor
@@ -94,7 +95,7 @@ public class CSTRReactor extends Reactor implements DifferentialEquation{
         return changeRate;
     }
 
-
+    //
     public double[] getSystemOutput(double t, double timeStep, double tolerance) {
         int n = super.getInletConcentrations().length;
         super.setCurrentSpeciesNumber(0);
@@ -102,15 +103,14 @@ public class CSTRReactor extends Reactor implements DifferentialEquation{
         for (int i =0; i<n; i++){
             equations[i] = this;
         }
-        double[] solution = RK45AdaptiveStep.solve(t, super.getCurrentConcentrations(), timeStep, equations, tolerance);
+        double[] solution = RK45.solve(t, super.getCurrentConcentrations(), timeStep, equations, tolerance);
+
+        //Controlled object is responsible for taking care of its own state when a timeStep occurs
+        //in other words, maintain the fact that classes should take care of their own business when possible
+        super.setCurrentConcentrations(solution);
 
         return solution;
 
-    }
-
-    @Override
-    public boolean isControlled() {
-        return super.getController() != null;
     }
 
     @Override
@@ -122,12 +122,13 @@ public class CSTRReactor extends Reactor implements DifferentialEquation{
 
     @Override
     public double[] getInitialValues() {
-        return new double[0];
+        double[] doubles = super.getInletConcentrations();
+        return doubles;
     }
 
     @Override
-    public PIDController getController() {
-        return super.getController().clone();
+    public boolean getIsControlled() {
+        return super.getIsControlled();
     }
 
     @Override
@@ -137,32 +138,34 @@ public class CSTRReactor extends Reactor implements DifferentialEquation{
 
     /** Applied function to calculate in RK45
      *
-     * @param t time
+     * @param x time
      * @param y array of ys for time t
-     * @param timeStep initial timeStep to use
-     * @param i which differential equation value to provide, in this case currentSpeciesNumber
      * @return Rate of change of the dependent variable with respect to the independent variable, here is change in concentration
+     *
      */
     @Override
-    public double apply(double t, double[] y, double timeStep, int i) {
+    public double apply(double x, double y) {
         double reactionRate = 0;
-        double changeRate = 0;
-        double[] inletConcentrations = super.getInletConcentrations();
+        Reaction reaction = super.getReaction();
+        double[] currentConcentrations = super.getCurrentConcentrations();
+        double volume = super.getVolume();
+        double  initialFlow = super.getInitialFlow();
+        int currSpeciesNumber = super.getCurrentSpeciesNumber();
+        double[] initialConcentrations = super.getInitialConcentrations();
 
         try {
-            reactionRate = super.getReaction().calculateReactionRate(y, i);
+            reactionRate = reaction.calculateReactionRate(currentConcentrations, currSpeciesNumber);
 
-            if (i > super.getReaction().getDelimeter()) { //product mass balance
-                changeRate = super.getCurrentFlow() * inletConcentrations[i] / super.getVolume() + reactionRate - super.getCurrentFlow() * y[i] / super.getVolume();
-            } else { //reactant mass balance
-                changeRate = super.getCurrentFlow() * y[i] / super.getVolume() - reactionRate - super.getCurrentFlow() * inletConcentrations[i] / super.getVolume();
-            }
         }
-
-       catch (IllegalArgumentException e) {
+        catch (IllegalArgumentException e) {
             System.out.println("Failed to simulate step: " + e.getMessage());
         }
+        //reactant mass balance, the
+        double changeRate =  initialFlow*(initialConcentrations[currSpeciesNumber]-currentConcentrations[currSpeciesNumber])/volume + reactionRate ;
+        if(++currSpeciesNumber < currentConcentrations.length){ //increment before logical expression
+            super.setCurrentSpeciesNumber(currSpeciesNumber);
+        }else{super.setCurrentSpeciesNumber(0);}
 
-        return changeRate;
+        return changeRate; //changed rate can be negative, need to check for negative concentration else where since they don't get changed here.
     }
 }

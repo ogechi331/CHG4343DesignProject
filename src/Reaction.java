@@ -5,8 +5,10 @@
  */
 public class Reaction implements Cloneable{
 
+
+
     private Species[] reactants;
-    private int delimeter;
+    private int delimiter;
     private Species[] products;
     private Species limitingReactant;
     private double k;
@@ -20,7 +22,7 @@ public class Reaction implements Cloneable{
     public Reaction(String rEquation, double k){
         parseReactionEquation(rEquation);
         this.k = k;
-        this.delimeter = reactants.length - 1;
+        this.delimiter = reactants.length;
     }
 
     /** Copy constructor for reaction object
@@ -30,7 +32,7 @@ public class Reaction implements Cloneable{
      * @author Ogechi
      */
     public Reaction(Reaction source){
-        if (source==null) throw new IllegalArgumentException("Error, copy of null reaction object");
+        if (source==null) throw new IllegalArgumentException("Error, cannot copy null reaction object");
 
         this.reactants = new Species[source.reactants.length];
         this.products = new Species[source.products.length];
@@ -42,6 +44,7 @@ public class Reaction implements Cloneable{
         }
         this.limitingReactant = source.limitingReactant;
         this.k = source.k;
+        this.delimiter = source.delimiter;
     }
 
     /** Clone method for reaction object
@@ -68,14 +71,20 @@ public class Reaction implements Cloneable{
     public double getK() {
         return k;
     }
-
+    public Species[] getReactants() {
+        Species[] copy = new Species[reactants.length];
+        for(int i =0; i<copy.length; i++){
+            copy[i] = reactants[i].clone();
+        }
+        return copy;
+    }
     /** Accessor method for limiting reactant
      *
      * @return limiting reactant species
      * @author Ogechi
      */
     public Species getLimitingReactant() {
-        return limitingReactant;
+        return limitingReactant.clone();
     }
 
     /** Accessor method for products species
@@ -87,8 +96,8 @@ public class Reaction implements Cloneable{
         return products.clone();
     }
 
-    public int getDelimeter() {
-        return delimeter;
+    public int getDelimiter() {
+        return delimiter;
     }
 
     /** Mutator method for reaction rate constant k
@@ -156,7 +165,7 @@ public class Reaction implements Cloneable{
         return true;
     }
     public boolean setDelimeter(int delimeter){
-        this.delimeter = delimeter;
+        this.delimiter = delimeter;
         return true;
     }
 
