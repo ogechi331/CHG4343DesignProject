@@ -16,6 +16,7 @@ public class RK45 {
      * @param h height of integration step
      * @param equation Array of differential equations to be solved
      * @return Array of y at next step value for each differential equation
+     * @author Ogechi
      */
     private static double[] rk4(double x, double[] y, double h, DifferentialEquation[] equation) {
         int n = y.length;
@@ -52,55 +53,89 @@ public class RK45 {
 
         return result;
     }
-    private static double rk45Step(double x, double[] y, double h, DifferentialEquation[] equation) {
-        int n = y.length;
+
+    /**
+     * Applies the Runge-Kutta-Fehlberg method for solving ordinary differential equations
+     * with adaptive step size control.
+     *
+     * @param x             Current time.
+     * @param y             Array of initial values for dependent variables.
+     * @param h             Initial step size.
+     * @param equation      Array of differential equations defining the system.
+     * @param tolerance     Tolerance for adaptive step size control.
+     * @param endTime       End time for the simulation.
+     * @return              A linked list containing the final values of dependent variables, the next step size, and the step size used for the current calculation.
+     * @author              Ogechi
+     */
+    private static SinglyLinkedList<Object> rk45Step(double x, double[] y, double h, DifferentialEquation[] equation, double tolerance, double endTime) {
+
+        int n = y.length; //initial value length storage integer
+
         k1 = new double[n];
         k2 = new double[n];
         k3 = new double[n];
         k4 = new double[n];
         k5 = new double[n];
         k6 = new double[n];
+        SinglyLinkedList<Object> list= new SinglyLinkedList<>();
 
+        while(true){
+            int minIndex = 0;
+            h = Math.min(h, endTime - x);
+
+            for (int i = 0; i < n; i++) {
+                k1[i] = equation[i].apply(x, y[i]);
+            }
+
+            double[] temp = addArrays(y, multiplyArray(k1, h / 4));
+            for (int i = 0; i < n; i++) {
+                k2[i] = equation[i].apply(x + h / 4, temp[i]);
+            }
+
+            temp = addArrays(addArrays(y, multiplyArray(k1, 3*h / 32)),multiplyArray(k2,9 *h /32));
+            for (int i = 0; i < n; i++) {
+                k3[i] = equation[i].apply(x + 3*h / 8, temp[i]);
+            }
+
+            temp = addArrays(addArrays(addArrays(y, multiplyArray(k1, 1932*h/2197)),multiplyArray(k2,-7200*h/2197)),multiplyArray(k3,7296*h/2197));
+            for (int i = 0; i < n; i++) {
+                k4[i] = equation[i].apply(x + 12*h/13, temp[i]);
+            }
+
+            temp = addArrays(addArrays(addArrays(addArrays(y, multiplyArray(k1, 439*h/216)),multiplyArray(k2,-8*h)),multiplyArray(k3,3680*h/513)),multiplyArray(k4,-845*h/4104));
+            for (int i = 0; i < n; i++) {
+                k5[i] = equation[i].apply(x +h, temp[i]);
+            }
+
+            temp = addArrays(addArrays(addArrays(addArrays(addArrays(y, multiplyArray(k1, -8*h/27)),multiplyArray(k2,2*h)),multiplyArray(k3,-3544*h/2565)),multiplyArray(k4,1859*h/4104)),multiplyArray(k5,-11*h/40));
+            for (int i = 0; i < n; i++) {
+                k6[i] = equation[i].apply(x +h/2, temp[i]);
+            }
+            double[][] result = new double[4][n];
+            double min = Double.MAX_VALUE;
+
+            for (int i = 0; i < n; i++) {
+                result[0][i] = y[i] + (25*k1[i]/216 + 1408* k3[i]/2565 + 2197*k4[i]/4104 - k5[i]/5) * h;
+                result[1][i] = y[i] + (16*k1[i]/135 + 6656* k3[i]/12825 + 28561*k4[i]/56430 - 9*k5[i]/50 + 2*k6[i]/55) * h;
+                result[2][i] = Math.abs(result[1][i]- result[0][i])/h;
+                result[3][i] = 0.84*Math.pow(tolerance/result[2][i],0.25);
+                if(result[2][i] < min) {
+                    min = result[2][i];
+                    minIndex = i;
+                }
+            }
+            if (result[2][minIndex] <= tolerance){
+                //use a linked list instead of array to use less memory and quicker computation -> alternative was double[][] array with many unused spaces
+                list.add(result[0]); //array of next values
+                list.add(h * result[3][minIndex]); //next h
+                list.add(h); //h used for this step
+                break;
+            }
+            h = h * result[3][minIndex];
+        }
         // Update k1, k2, k3, and k4
-        for (int i = 0; i < n; i++) {
-            k1[i] = equation[i].apply(x, y[i]);
-        }
+        return list;
 
-        double[] temp = addArrays(y, multiplyArray(k1, h / 4));
-        for (int i = 0; i < n; i++) {
-            k2[i] = equation[i].apply(x + h / 4, temp[i]);
-        }
-
-        temp = addArrays(addArrays(y, multiplyArray(k1, 3*h / 32)),multiplyArray(k2,9 *h /32));
-        for (int i = 0; i < n; i++) {
-            k3[i] = equation[i].apply(x + 3*h / 8, temp[i]);
-        }
-
-        temp = addArrays(addArrays(addArrays(y, multiplyArray(k1, 1932*h/2197)),multiplyArray(k2,-7200*h/2197)),multiplyArray(k3,7296*h/2197));
-        for (int i = 0; i < n; i++) {
-            k4[i] = equation[i].apply(x + 12*h/13, temp[i]);
-        }
-
-        temp = addArrays(addArrays(addArrays(addArrays(y, multiplyArray(k1, 439*h/216)),multiplyArray(k2,-8*h)),multiplyArray(k3,3680*h/513)),multiplyArray(k4,-845*h/4104));
-        for (int i = 0; i < n; i++) {
-            k5[i] = equation[i].apply(x +h, temp[i]);
-        }
-
-        temp = addArrays(addArrays(addArrays(addArrays(addArrays(y, multiplyArray(k1, -8*h/27)),multiplyArray(k2,2*h)),multiplyArray(k3,-3544*h/2565)),multiplyArray(k4,1859*h/4104)),multiplyArray(k5,-11*h/40));
-        for (int i = 0; i < n; i++) {
-            k6[i] = equation[i].apply(x +h/2, temp[i]);
-        }
-        // Update the state vector
-        double[][] result = new double[3][n];
-        double min = Double.MAX_VALUE;
-        for (int i = 0; i < n; i++) {
-            result[0][i] = y[i] + (25*k1[i]/216 + 1408* k3[i]/2565 + 2197*k4[i]/4101 - k5[i]/5) * h;
-            result[1][i] = y[i] + (16*k1[i]/135 + 6656* k3[i]/12825 + 28561*k4[i]/56430 - 9*k5[i]/50 + 2*k6[i]/55) * h;
-            result[2][i] = Math.pow(0.84*Math.abs(result[1][i]- result[0][i]),0.25);
-            min = Math.min(result[2][i], min);
-        }
-        if (min <= 0) return h;
-        return h*min;
     }
 
     // Helper method to add two arrays element-wise
@@ -122,58 +157,49 @@ public class RK45 {
         }
         return result;
     }
-    private static double determineStepSize(double t0, double[] y0, double endTime, DifferentialEquation[] equations){
-        return rk45Step(t0,y0,(endTime-t0)/10,equations);
-    }
 
-    // Solve the system of differential equations
+    /**Solves a system of ordinary differential equations using the Runge-Kutta-Fehlberg method.
+     *
+     * @param t0 Initial Time
+     * @param y0 Initial values of the dependent variables
+     * @param endTime End time for the simulation
+     * @param equations Array of differential equaitons defining the system
+     * @param tolerance Tolerance for the adaptive step size control
+     * @return Array containing the final values of the dependent variables after simulating the system until the specified end time
+     * @author Ogechi
+     */
     public static double[] solve(double t0, double[] y0, double endTime, DifferentialEquation[] equations, double tolerance) {
-        double h = determineStepSize(t0, y0,endTime,equations);
-        int numEquations = equations.length;
-        int numSteps = (int) ((endTime - t0) / h) + 1;
+        double h = (endTime-t0)/2; //initial guess of h
 
-        double[][] solution = new double[numSteps][numEquations];
         double[] currentY = new double[y0.length];
 
-        for(int i = 0; i < y0.length; i++){
-            currentY[i] = y0[i];
-        }
+        System.arraycopy(y0, 0, currentY, 0, y0.length);
         double currentTime = t0;
+        SinglyLinkedList<Object> temp;
 
-        for (int i = 0; i < numSteps; i++) {
-            currentY = rk4(currentTime, currentY, h, equations);
-            solution[i] = currentY;
-            currentTime += h;
+        while (currentTime < endTime) {
+            temp = rk45Step(currentTime, currentY, h, equations, tolerance, endTime);
+            currentY = (double[]) temp.getFirst().getElement();
+            h = (double) temp.getAt(1).getElement();
+            currentTime += (double) temp.getLast().getElement();
         }
 
-        return solution[solution.length -2];
+        return currentY;
     }
 
-    /*public static void test(String[] args) {
-        // Example usage:
-        // Define a system of differential equations for a CSTR using lambda expression
-        double tolerance = 0.01;
-        DifferentialEquation[] equations = {
-                (x, y) -> 0.05 * (0.2 - y) - 0.2*y,          // dCA/dt = v0* (CA0 - CA)/V - kCA
-                (x, y) -> 0.05 *(y) + 0.2*y        // dCB/dt not working but pretty sure the mass balance is wrong
-        };
-
+    /**Main method used to test the validity of the RK45 solution
+     * @param args
+     */
+    public static void main(String[] args) {
+        //main to test rk45. Known solution in 8 steps with output value of 5.305486816572746
+        //Test Example reference: https://math.okstate.edu/people/yqwang/teaching/math4513_fall11/Notes/rungekutta.pdf
+        double tolerance = 0.00001;
+        DifferentialEquation[] equations = {(t, y) -> y - Math.pow(t, 2) + 1};
         // Initial concentrations
         double t0 = 0.0;
-        double[] y0 = {0.2,0};  // Initial concentrations of A and B
+        double[] y0 = {0.5};
+        double endTime = 2;
+        System.out.println(solve(t0, y0, endTime, equations, tolerance)[0]);
 
-        // Time step and end time
-        double endTime = 50;
-
-        // Solve the system
-        double[][] solution = solve(t0, y0, endTime, equations, tolerance);
-
-        // Print the results
-        for (double[] step : solution) {
-            for (double value : step) {
-                System.out.print(value + " ");
-            }
-            System.out.println();
-        }
-    }*/
+    }
 }
