@@ -1,3 +1,7 @@
+//Status: to be Reviewed
+//IMPORTANT: currentConcentrations may seem redundant because of inletConcentrations but both are actually needed.
+
+//TODO: clean up (ensure we have all getters and setters)
 /** Abstract parent class for reactor types
  * @author Alex
  * @author Dylan

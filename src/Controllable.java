@@ -1,3 +1,4 @@
+//Complete
 /** Interface for controllable classes
  * @author Ogechi
  * @version 1.0
@@ -40,6 +41,12 @@ public interface Controllable {
      * @author Dylan
      */
     double[] getSystemOutput(double t, double timeStep, double tolerance);
+
+
+    /**Applies the disturbance to the controlled parameter of the Controllable object
+     *
+     * @param dist value of applied disturbance
+     */
     void simulateDisturbance(double dist);
     //void tunePIDParameters(); -> bonus
 }

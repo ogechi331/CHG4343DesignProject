@@ -1,6 +1,8 @@
+//Status: Complete
+
 public class RK45 {
 
-    // NOTE: these instance variables should not have getters and setters as they are helper variables, and could mess with calculations
+    //IMPORTANT: these instance variables should not have getters and setters as they are helper variables, and could mess with calculations
     private static double[] k1;
     private static double[] k2;
     private static double[] k3;

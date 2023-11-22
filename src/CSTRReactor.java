@@ -1,3 +1,5 @@
+//Status: in Review
+//TODO: clean up (ensure we have all getters, setters, delete unnecessary variables)
 /** Concrete class for the CSTR reactor
  * @author Alex
  * @author Dylan
@@ -7,7 +9,7 @@
 public class CSTRReactor extends Reactor implements DifferentialEquation, Controllable{
 
 
-    /** Constructor for CSTR reactor
+    /** Constructor for Uncontrolled CSTR reactor
      *
      * @param V reactor volume
      * @param initialFlow initial volumetric flow rate into the reactor
@@ -17,10 +19,23 @@ public class CSTRReactor extends Reactor implements DifferentialEquation, Contro
      * @throws IllegalArgumentException if volume<0, initial flow<0, concentrations<0, inlet concentrations<0, and if reaction, initial concentrations or initial concentrations are null
      * @author Alex
      * @author Dylan
+     * @author Ogechi
      */
     public CSTRReactor(double V, double initialFlow, Reaction reaction, double[] initialConcentrations, double[] inletConcentrations) {
         super(V, initialFlow, reaction, initialConcentrations, inletConcentrations, 0, false);
     }
+    /** Constructor for Controlled CSTR reactor
+     *
+     * @param V reactor volume
+     * @param initialFlow initial volumetric flow rate into the reactor
+     * @param reaction reaction object representing the reactor in the reactor
+     * @param initialConcentrations initial concentrations of species in the reactor
+     * @param inletConcentrations inlet concentrations to the reactor after step change
+     * @param controlled index of controlled variable in concentration array
+     * @param isControlled state of whether CSTR is controlled
+     * @throws IllegalArgumentException if volume<0, initial flow<0, concentrations<0, inlet concentrations<0, and if reaction, initial concentrations or initial concentrations are null
+     * @author Ogechi
+     */
     public CSTRReactor(double V, double initialFlow, Reaction reaction, double[] initialConcentrations, double[] inletConcentrations, int controlled, boolean isControlled) {
         super(V, initialFlow, reaction, initialConcentrations, inletConcentrations, controlled, isControlled);
     }
@@ -62,42 +77,9 @@ public class CSTRReactor extends Reactor implements DifferentialEquation, Contro
         return super.equals(comparator);
     }
 
-    /** Method to simulate change in concentration over time step
-     *
-     * @param timeStep time step
-     * @param flowRate updated flow rate
-     * @param currentConcentrations current concentrations
-     * @param currentSpeciesNumber current species to simulate
-     * @return change in concentration over time step
-     * @author Alex
-     * @author Dylan
-     */
-    public double simulateStep(double timeStep,double flowRate, double[] currentConcentrations, int currentSpeciesNumber){
-        double reactionRate;
-        double[] inletConcentrations = new double[super.getInletConcentrations().length];
-
-        double changeRate = 0;
-
-        inletConcentrations = super.getInletConcentrations();
-        try {
-            reactionRate = super.getReaction().calculateReactionRate(currentConcentrations, currentSpeciesNumber);
-
-            changeRate = flowRate*inletConcentrations[currentSpeciesNumber];
-            changeRate = changeRate - (flowRate*currentConcentrations[currentSpeciesNumber]);
-            changeRate = changeRate + (reactionRate*super.getVolume());
-
-            changeRate = ((1/super.getVolume())*changeRate);
-        }
-        catch (IllegalArgumentException e) {
-            System.out.println("Failed to simulate step: " + e.getMessage());
-        }
-
-        return changeRate;
-    }
-
     //
     public double[] getSystemOutput(double t, double timeStep, double tolerance) {
-        int n = super.getInletConcentrations().length;
+        int n = super.getCurrentConcentrations().length;
         super.setCurrentSpeciesNumber(0);
         DifferentialEquation[] equations =  new DifferentialEquation[n];
         for (int i =0; i<n; i++){
@@ -129,8 +111,7 @@ public class CSTRReactor extends Reactor implements DifferentialEquation, Contro
 
     @Override
     public double[] getInitialValues() {
-        double[] doubles = super.getInletConcentrations();
-        return doubles;
+        return super.getCurrentConcentrations();
     }
 
     @Override

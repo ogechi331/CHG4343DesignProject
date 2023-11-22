@@ -1,3 +1,4 @@
+//Complete
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
@@ -5,7 +6,29 @@ import java.io.IOException;
 import java.util.*;
 import java.util.regex.PatternSyntaxException;
 
+/**
+ * The `Driver` class represents the main entry point for running a simulation of a chemical reactor
+ * with a PID controller. It reads input parameters from a file, initializes the reactor, controller,
+ * and reaction, and performs a simulation using the PID controller.
+ *
+ * The input file should contain key-value pairs separated by a colon (":"). The keys are used to
+ * identify and retrieve specific parameters for initializing the simulation.
+ *
+ * The output of the simulation is written to a CSV file, and the file name for output is also specified
+ * in the input file.
+ *
+ * @author Ogechi
+ */
 public class Driver {
+
+    /**
+     * The main method of the `Driver` class. It reads input parameters from a file, initializes the
+     * reactor, controller, and reaction, and performs a simulation using the PID controller. The output
+     * of the simulation is written to a CSV file.
+     *
+     * @param args Command line arguments (not used).
+     * @throws IOException If an error occurs during file reading or writing.
+     */
     public static void main(String[] args) throws IOException {
         Reaction reaction;
         String[] header = null;
@@ -122,12 +145,39 @@ public class Driver {
 
     }
 
-    /**Populates a Map with String key-value pairs from a colon separated file. The keys in the file must match those used, else construction of Object will throw IllegalArgument Exception.
-     * <p>The parameters to be populated have the following keys:</p>
-     * <p> "header": header for file output (Time, controllable output variable values, manipulated variable, P, I, D) </p>
-     * @param strFileName Path of file
-     * @return Map<String, String> </String,> Map containing the data from the file
-     * @throws FileNotFoundException
+    /**
+     * Populates a Map with String key-value pairs from a colon-separated file. The keys in the file must
+     * match those used; otherwise, the construction of Object will throw an IllegalArgumentException.
+     * <p>
+     * The parameters to be populated have specific keys:
+     * </p>
+     * <ul>
+     * <li>"header": Header for file output (Time, controllable output variable values, manipulated variable, P, I, D)</li>
+     * <li>"populate to file": File name to which the simulation results should be populated.</li>
+     * <li>"volume": Volume of the reactor.</li>
+     * <li>"initial flow": Initial flow rate of the reactor.</li>
+     * <li>"initial concentrations": Initial concentrations of the reactants in the reactor (comma-separated).</li>
+     * <li>"inlet concentrations": Inlet concentrations of the reactants (comma-separated).</li>
+     * <li>"controlled": The index of the controllable variable in the reactor.</li>
+     * <li>"is controlled": Boolean indicating whether the reactor is controlled.</li>
+     * <li>"reaction equation": Equation representing the chemical reaction.</li>
+     * <li>"k": Reaction rate constant.</li>
+     * <li>"controller type": Type of the PID controller.</li>
+     * <li>"start time": Start time of the simulation.</li>
+     * <li>"end time": End time of the simulation.</li>
+     * <li>"time step": Time step for the simulation.</li>
+     * <li>"controller gain": Gain parameter of the PID controller.</li>
+     * <li>"integrating time constant": Integrating time constant of the PID controller.</li>
+     * <li>"derivative time constant": Derivative time constant of the PID controller.</li>
+     * <li>"tolerance": Tolerance for the simulation.</li>
+     * <li>"set point": Set point for the controlled variable.</li>
+     * <li>"dead time": Dead time in the system.</li>
+     * <li>"disturbances": Disturbances applied during the simulation (semicolon-separated pairs of time and magnitude).</li>
+     * </ul>
+     *
+     * @param strFileName Path of the file.
+     * @return Map<String, String> Map containing the data from the file.
+     * @throws FileNotFoundException If the specified file is not found.
      * @author Ogechi
      */
     private static Map<String,String> populateFromFile(String strFileName) throws FileNotFoundException {
@@ -186,14 +236,18 @@ public class Driver {
         return dictionary;
     }
 
-    /**Populates a CSV file with the simulation results
+    /**
+     * Populates a CSV file with the simulation results.
      *
-     * @param filePath
-     * @param data
-     * @param header
+     * @param filePath Path of the output file.
+     * @param data Simulation data to be written to the file.
+     * @param header Header for the CSV file.
      * @author Ogechi
      */
     private static void populateToFile(String filePath, double[][] data, String[] header){
+        if (!filePath.toLowerCase().endsWith(".csv")) {
+            filePath += ".csv";
+        }
         File file = new File(filePath);
 
         try{

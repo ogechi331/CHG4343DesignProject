@@ -1,8 +1,11 @@
+//REVIEW: Complete, review minor things
+
 /** Reaction class
  * @author Ogechi
  * @author Dylan
  * @version 1.3
  */
+//TODO: clean up code: no need for limiting reactant as the concentration balance takes care of that -> keep for robustness, perhaps not as instance of class
 public class Reaction implements Cloneable{
 
 

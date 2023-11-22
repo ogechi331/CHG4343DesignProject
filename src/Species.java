@@ -1,7 +1,9 @@
+//Status: Complete
 /** Chemical species class
  * @author Ogechi
  * @author Dylan
  * @version 1.3
+ *
  */
 public class Species implements Cloneable{
     private String name;

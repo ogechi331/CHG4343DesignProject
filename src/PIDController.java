@@ -1,8 +1,12 @@
+//REVIEW : to be Reviewed
 /** Class for PID control loops for transient processes
  * @author Dylan
  * @author Ogechi
  * @version 2.0
  */
+
+//TODO: Fix global variables
+//TODO: clean up (ensure we have all getters, setters)
 public class PIDController {
 
     public enum CONTROLLER_TYPE {
@@ -101,7 +105,7 @@ public class PIDController {
         this.g_setPoint=source.g_setPoint;
         this.g_output=source.g_output;
         this.disturbances = source.disturbances; //needs to be correctly cloned later
-        //TODO add simulation and previous time
+        //TODO add previous time
     }
 
     /** Clone method to call the copy constructor
@@ -298,16 +302,13 @@ public class PIDController {
     /** Reset method for global variables
      * @author Dylan
      */
-    protected void resetGlobalVariables() { //TODO: should we really reset P, I, D and setPoint?
-        this.g_P=0;
-        this.g_I=0;
+    //FIXME: ensure we have Global Variables that make sense for user
+    protected void resetGlobalVariables() { //TODO: should we really reset P, I, D and setPoint, these are identified by the use  and could be used again?
         this.g_pastI=0;
-        this.g_D=0;
         this.g_pastD=0;
         this.g_processVariable=0;
-        this.g_setPoint=0;
         this.g_output=0;
-        this.g_previousTime=0;
+        this.g_previousTime=this.startTime;
     }
 
     /** Equals method
@@ -338,7 +339,6 @@ public class PIDController {
         if (specificComparator.g_setPoint!=this.g_setPoint) return false;
         if (specificComparator.g_output!=this.g_output) return false;
         if (specificComparator.g_previousTime!=this.g_previousTime) return false;
-        //TODO add simulation
 
         return true;
     }
@@ -514,7 +514,7 @@ public class PIDController {
                 step++;
             }
         }
-        resetGlobalVariables(); //TODO: verify if reset makes sense here, also reset var method
+        resetGlobalVariables();
         return g_simulation;
     }
 
