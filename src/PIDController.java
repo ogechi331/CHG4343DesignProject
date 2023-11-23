@@ -414,6 +414,10 @@ public class PIDController {
          * simulation [n-1] : D
          *
          */
+
+        //TODO: Add CA0
+        //TODO: Step Change for Uncontrolled
+
         double[][] g_simulation;
         if(this.controllable.getIsControlled()){
             //number of variables to store
@@ -441,8 +445,7 @@ public class PIDController {
             g_simulation[0][n-2] = this.g_I;
             g_simulation[0][n-1] = this.g_D;
 
-
-
+            temp = this.controllable.getInitialValues();
 
             queue.enqueue(new double[]{this.g_previousTime + this.timeStep,this.g_output});
 
@@ -463,10 +466,10 @@ public class PIDController {
 
                 // Check if controlled action takes place
                 if (!queue.isEmpty()) {
-                    temp = queue.peek();
-                    if (temp[0] <= this.g_previousTime + this.timeStep) {
-                        g_simulation[step][n - 4] = temp[1];
-                        this.controllable.setManipulatedVariable(temp[1]);
+                    //temp = queue.peek();
+                    if (queue.peek()[0] <= this.g_previousTime + this.timeStep) {
+                        g_simulation[step][n - 4] = queue.peek()[1];
+                        this.controllable.setManipulatedVariable(queue.peek()[1]);
                         queue.dequeue();
                     } else {
                         g_simulation[step][n - 4] = g_simulation[step - 1][n - 4];
@@ -474,12 +477,12 @@ public class PIDController {
                 }
 
                 // Get System output
-                temp = this.controllable.getSystemOutput(this.g_previousTime, this.g_previousTime + this.timeStep, this.tolerance);
-
+                this.controllable.getSystemOutput(this.g_previousTime, this.g_previousTime + this.timeStep, this.tolerance);
                 // Tabulate System output to simulation array
                 for (int i = 0; i < n - 5; i++) {
                     g_simulation[step][i + 1] = temp[i];
                 }
+                temp = this.controllable.getInitialValues();
 
                 // Set the processVariable since output has been updated
                 this.g_processVariable = this.controllable.getControlledVar();  // Assuming the last element is the controlled variable

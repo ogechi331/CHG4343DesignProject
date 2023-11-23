@@ -111,7 +111,7 @@ public class CSTRReactor extends Reactor implements DifferentialEquation, Contro
 
     @Override
     public double[] getInitialValues() {
-        return super.getInletConcentrations();
+        return super.getCurrentConcentrations();
     }
 
     @Override
