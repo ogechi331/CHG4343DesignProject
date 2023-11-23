@@ -1,5 +1,5 @@
 header : Time, CA, CB
-populate to file : C:\Users\Ogechi\IdeaProjects\CHG4343DesignProject\src\UncontrolledCSTRResults
+populate to file : UncontrolledCSTRResults
 
 volume : 1
 initial flow : 0.05
