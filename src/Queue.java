@@ -34,7 +34,9 @@ public class Queue<E>{
      */
     public E dequeue(){
         if(queue.isEmpty()) throw new NullPointerException();
-        return queue.getFirst().getElement();
+        E elem = queue.getFirst().getElement();
+        queue.deleteAt(0);
+        return elem;
     }
 
     /**

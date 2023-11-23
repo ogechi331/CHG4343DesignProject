@@ -232,19 +232,18 @@ public class SinglyLinkedList <E> {
      * @author Ogechi
      */
     public boolean deleteAt(int i) {
-        if (i < 0 || i > this.size - 1) {
+        if (i < 0 || i >= this.size) {
             return false;
         }
-        Node<E> current = head;
-        int counter = 0;
-        while (counter != i - 1) {
-            current = current.getNext();
-            counter++;
-        }
-        if (i == this.size-1) {
-            current.setNext(null);
-        }
-        else {
+        if (i == 0) {
+            head = head.getNext();
+        } else {
+            Node<E> current = head;
+            int counter = 0;
+            while (counter != i - 1 && current != null) {
+                current = current.getNext();
+                counter++;
+            }
             current.setNext(current.getNext().getNext());
         }
         size--;

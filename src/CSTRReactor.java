@@ -111,7 +111,7 @@ public class CSTRReactor extends Reactor implements DifferentialEquation, Contro
 
     @Override
     public double[] getInitialValues() {
-        return super.getCurrentConcentrations();
+        return super.getInletConcentrations();
     }
 
     @Override
@@ -121,7 +121,9 @@ public class CSTRReactor extends Reactor implements DifferentialEquation, Contro
 
     @Override
     public void setManipulatedVariable(double var) {
-        super.setCurrentFlowRate(var);
+        System.out.print(super.setCurrentFlowRate(var));
+        System.out.println(" " + super.getCurrentFlow()+" : "+var); //temporary print statements for testing -> delete later
+
     }
 
     /** Applied function to calculate in RK45
@@ -137,7 +139,7 @@ public class CSTRReactor extends Reactor implements DifferentialEquation, Contro
         Reaction reaction = super.getReaction();
         double[] currentConcentrations = super.getCurrentConcentrations();
         double volume = super.getVolume();
-        double  initialFlow = super.getInitialFlow();
+        double  initialFlow = super.getCurrentFlow();
         int currSpeciesNumber = super.getCurrentSpeciesNumber();
         double[] initialConcentrations = super.getInitialConcentrations();
 
