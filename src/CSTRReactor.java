@@ -121,7 +121,7 @@ public class CSTRReactor extends Reactor implements DifferentialEquation, Contro
 
     @Override
     public void setManipulatedVariable(double var) {
-        System.out.print(super.setCurrentFlowRate(var));
+        System.out.print(super.setInitialFlow(var));
         System.out.println(" " + super.getCurrentFlow()+" : "+var); //temporary print statements for testing -> delete later
 
     }
@@ -139,7 +139,7 @@ public class CSTRReactor extends Reactor implements DifferentialEquation, Contro
         Reaction reaction = super.getReaction();
         double[] currentConcentrations = super.getCurrentConcentrations();
         double volume = super.getVolume();
-        double  initialFlow = super.getCurrentFlow();
+        double  initialFlow = super.getInitialFlow();
         int currSpeciesNumber = super.getCurrentSpeciesNumber();
         double[] initialConcentrations = super.getInitialConcentrations();
 
