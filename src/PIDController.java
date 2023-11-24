@@ -407,8 +407,9 @@ public class PIDController {
 
         /*Array holding Simulation results each row contains the simulation values at the given time
          * simulation[0] : Time
-         * simulation[1 to n-5]: controllable output values
-         * simulation[n-4] : manipulated variable
+         * simulation[1 to n-6]: controllable output values
+         * simulation [n-5] : disturbed variable
+         * simulation [n-4] : manipulated variable
          * simulation [n-3] : P
          * simulation [n-2] : I
          * simulation [n-1] : D
@@ -421,10 +422,10 @@ public class PIDController {
         double[][] g_simulation;
         if(this.controllable.getIsControlled()){
             //number of variables to store
-            int n = this.controllable.getInitialValues().length + 5;
+            int n = this.controllable.getInitialValues().length + 6;
             Queue<double[]> queue = new Queue<>();
 
-            g_simulation = new double[(int) (this.numberOfSteps)][n+1]; // +1 is for testing to log controller output -> delete later
+            g_simulation = new double[(int) (this.numberOfSteps)][n]; // +1 is for testing to log controller output -> delete later
             double error;
             double[] temp;
 
@@ -433,13 +434,13 @@ public class PIDController {
             for(int i = 0; i < this.controllable.getInitialValues().length; i++){
                 g_simulation[0][i+1] = 0;
             }
-            this.controllable.setManipulatedVariable(0);
+
             this.g_processVariable = this.controllable.getControlledVar();
             simulateProportionalStep(g_setPoint - g_processVariable);
-            this.g_pastD = 0;
+
             this.g_output = g_P;
 
-
+            g_simulation[0][n-5] = this.controllable.getDisturbedVar();
             g_simulation[0][n-4] = this.g_processVariable;
             g_simulation[0][n-3] = this.g_P;
             g_simulation[0][n-2] = this.g_I;
@@ -479,7 +480,7 @@ public class PIDController {
                 // Get System output
                 this.controllable.getSystemOutput(this.g_previousTime, this.g_previousTime + this.timeStep, this.tolerance);
                 // Tabulate System output to simulation array
-                for (int i = 0; i < n - 5; i++) {
+                for (int i = 0; i < n - 6; i++) {
                     g_simulation[step][i + 1] = temp[i];
                 }
                 temp = this.controllable.getInitialValues();
@@ -494,10 +495,11 @@ public class PIDController {
                 this.g_output = compute();
 
                 // Store PID values in simulation
+                g_simulation[step][n - 5] = this.controllable.getDisturbedVar();
                 g_simulation[step][n - 3] = this.g_P;
                 g_simulation[step][n - 2] = this.g_I;
                 g_simulation[step][n - 1] = this.g_D;
-                g_simulation[step][n - 1 + 1] = this.g_output; // +1 is for testing to log controller output -> delete later
+                //g_simulation[step][n - 1 + 1] = this.g_output; // +1 is for testing to log controller output -> delete later
 
                 // Enqueue the controller action
                 queue.enqueue(new double[]{this.g_previousTime + this.deadTime, this.g_output});
@@ -509,25 +511,54 @@ public class PIDController {
                 step++;
             }
         } else {
-            int n = this.controllable.getInitialValues().length+ 1;
+            int n = this.controllable.getInitialValues().length+ 3;
             g_simulation = new double[(int)this.numberOfSteps][n];
-
-            //store initial values in simulation
-            g_simulation[0][0] = this.g_previousTime;
-            for(int i = 0; i < controllable.getInitialValues().length; i++){
-                g_simulation[0][i+1] = controllable.getInitialValues()[i];
-            }
-            int step = 1;
             double[] temp;
 
-            while(step <numberOfSteps){
-                temp = this.controllable.getSystemOutput(this.g_previousTime, this.g_previousTime + this.timeStep, this.tolerance);
-                for (int i = 0; i < n-1; i++) {
-                    g_simulation[step][i+1] = temp[i];
-                }
-                this.g_previousTime += this.timeStep;
-                g_simulation[step][0] = this.g_previousTime;
+            //initialize the first row with initial values
+            g_simulation[0][0] = this.startTime;
+            for(int i = 0; i < this.controllable.getInitialValues().length; i++){
+                g_simulation[0][i+1] = 0;
+            }
 
+            g_simulation[0][n-1] = this.controllable.getControlledVar();
+            g_simulation[0][n-1] = this.controllable.getDisturbedVar();
+
+
+            temp = this.controllable.getInitialValues();
+
+            int step = 1;
+
+            while (step < numberOfSteps) {
+                g_simulation[step][0] = this.g_previousTime + this.timeStep;
+
+                // Check if disturbance action takes place, if not then continue
+                if (!this.disturbances.isEmpty()) {
+                    if (this.disturbances.peek()[0] <= this.g_previousTime + this.timeStep) {
+                        this.controllable.simulateDisturbance(disturbances.dequeue()[1]);
+                    }
+                }
+                g_simulation[step][n-2] = this.controllable.getControlledVar();
+                g_simulation[step][n-1] = this.controllable.getDisturbedVar();
+
+
+                // Get System output
+                this.controllable.getSystemOutput(this.g_previousTime, this.g_previousTime + this.timeStep, this.tolerance);
+                // Tabulate System output to simulation array
+                for (int i = 0; i < n - 3; i++) {
+                    g_simulation[step][i + 1] = temp[i];
+                }
+                temp = this.controllable.getInitialValues();
+
+                // Set the processVariable since output has been updated
+                this.g_processVariable = this.controllable.getControlledVar();  // Assuming the last element is the controlled variable
+
+
+
+                // Update the previous time
+                this.g_previousTime += timeStep;
+
+                // Move to the next step
                 step++;
             }
         }

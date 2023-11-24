@@ -1,18 +1,19 @@
-header : Time, CA, CB
+header : Time, CA, CB,CAO, v0
 populate to file : UncontrolledCSTRResults
 
 volume : 1
 initial flow : 0.05
-initial concentrations : 0.2, 0
-inlet concentrations : 0.2, 0
+initial concentrations : 0, 0
+inlet concentrations : 0, 0
 controlled : 0
 is controlled : false
 reaction equation : A -> B
 k : 0.2
 start time : -0.1
 end time : 50
-time step : 1
+time step : 0.1
 tolerance : 0.01
+disturbances : 0, 0.2
 
 
 

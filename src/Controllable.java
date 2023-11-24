@@ -6,6 +6,7 @@
 public interface Controllable {
 
 
+
     /**Returns the value of a Controllable object's controlled variable
      * @return Controlled variable as double
      * @author Ogechi
@@ -31,6 +32,12 @@ public interface Controllable {
      *@author Ogechi
      */
     void setManipulatedVariable(double var);
+
+    /**Returns the value of the variable eligible to be disturbed in the Controllable object
+     * @return value of disturbed variable
+     * @author Ogechi
+     */
+    double getDisturbedVar();
 
     /**Obtains the output of the Controllable object after a time step.
      * WARNING: This method is responsible for updating the current state of the Controllable object.

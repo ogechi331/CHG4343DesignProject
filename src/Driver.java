@@ -100,28 +100,28 @@ public class Driver {
             double endTime = Double.parseDouble(dict.get("end time"));
             double timeStep = Double.parseDouble(dict.get("time step"));
             double tolerance = Double.parseDouble(dict.get("tolerance"));
-            if(!isControlled){
-                pidController = new PIDController(startTime, endTime, timeStep, 0, 0, 0, PIDController.CONTROLLER_TYPE.UNCONTROLLED, 0, cstrReactor, tolerance, null, 0);
+            Queue<double[]> disturbances = new Queue<>();
+            if(!(dict.get("disturbances")).contains(";")){
+                String[] s = dict.get("disturbances").trim().split(",");
+                double[] d = new double[2];
+                for(int i = 0; i < 2; i++){
+                    d[i] = Double.parseDouble(s[i].trim());
+                }
+                disturbances.enqueue(d);
             }else{
-                Queue<double[]> disturbances = new Queue<>();
-                if(!(dict.get("disturbances")).contains(";")){
-                    String[] s = dict.get("disturbances").trim().split(",");
+                String[] str = dict.get("disturbances").trim().split(";");
+                for (String string : str){
+                    String[] s = string.trim().split(",");
                     double[] d = new double[2];
                     for(int i = 0; i < 2; i++){
                         d[i] = Double.parseDouble(s[i].trim());
                     }
                     disturbances.enqueue(d);
-                }else{
-                    String[] str = dict.get("disturbances").trim().split(";");
-                    for (String string : str){
-                        String[] s = string.trim().split(",");
-                        double[] d = new double[2];
-                        for(int i = 0; i < 2; i++){
-                            d[i] = Double.parseDouble(s[i].trim());
-                        }
-                        disturbances.enqueue(d);
-                    }
                 }
+            }
+            if(!isControlled){
+                pidController = new PIDController(startTime, endTime, timeStep, 0, 0, 0, PIDController.CONTROLLER_TYPE.UNCONTROLLED, 0, cstrReactor, tolerance, disturbances, 0);
+            }else{
                 pidController = new PIDController(startTime, endTime, timeStep,
                         Double.parseDouble(dict.get("controller gain")),
                         Double.parseDouble(dict.get("integrating time constant")),

@@ -158,4 +158,8 @@ public class CSTRReactor extends Reactor implements DifferentialEquation, Contro
 
         return changeRate; //changed rate can be negative, need to check for negative concentration else where since they don't get changed here.
     }
+
+    public double getDisturbedVar(){
+        return super.getInitialConcentrations()[super.getControlled()];
+    }
 }
