@@ -6,7 +6,7 @@
  * @author Ogechi
  * @version 2.2
  */
-public class CSTRReactor extends Reactor implements DifferentialEquation, Controllable{
+public class CSTRReactor extends Reactor {
 
 
     /** Constructor for Uncontrolled CSTR reactor

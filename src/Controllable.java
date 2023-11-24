@@ -55,5 +55,16 @@ public interface Controllable {
      * @author Ogechi
      */
     void simulateDisturbance(double dist);
+
+    /**
+     * ...
+     * @return A new instance of the {@code Controllable} object, identical
+     *         to the original in terms of state and behavior.
+     * @throws CloneNotSupportedException if the object's class does not
+     *         support the {@code Cloneable} interface. Subclasses that
+     *         override this method should also override this exception.
+     * @see Cloneable
+     */
+    Controllable clone() throws CloneNotSupportedException;
     //void tunePIDParameters(); -> bonus
 }

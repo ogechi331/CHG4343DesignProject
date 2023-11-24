@@ -7,7 +7,7 @@
 
 //TODO: Fix global variables
 //TODO: clean up (ensure we have all getters, setters)
-public class PIDController {
+public class PIDController implements Cloneable{
 
     public enum CONTROLLER_TYPE {
         UNCONTROLLED, P, PI, PD, I, ID, D, PID
@@ -52,7 +52,7 @@ public class PIDController {
      * @throws IllegalArgumentException if end time is before start time or time step is too large for the range given (<1 step) or if controller type is null or if dead time is negative or if tolerance not greater than 0
      * @author Dylan
      */
-    public PIDController(double startTime, double endTime, double timeStep, double controllerGain, double integratingTimeConstant, double derivativeTimeConstant, CONTROLLER_TYPE controllerType, double deadTime, Controllable controllable, double tolerance, Queue<double[]> disturbances, double g_setPoint) {
+    public PIDController(double startTime, double endTime, double timeStep, double controllerGain, double integratingTimeConstant, double derivativeTimeConstant, CONTROLLER_TYPE controllerType, double deadTime, Controllable controllable, double tolerance, Queue<double[]> disturbances, double g_setPoint) throws CloneNotSupportedException {
 
         if (controllerType==null) throw new IllegalArgumentException("Controller type cannot be null");
         if (endTime<startTime) throw new IllegalArgumentException("Error end time must be larger than start time");
@@ -69,7 +69,7 @@ public class PIDController {
         this.numberOfSteps = (int)Math.ceil((this.endTime-this.startTime)/this.timeStep)+1;
         this.controllerType = controllerType;
         this.deadTime = deadTime;
-        this.controllable = controllable;
+        this.controllable = controllable.clone();
         this.tolerance=tolerance;
         this.disturbances = disturbances;
         this.g_setPoint = g_setPoint;
@@ -416,8 +416,6 @@ public class PIDController {
          *
          */
 
-        //TODO: Add CA0
-        //TODO: Step Change for Uncontrolled
 
         double[][] g_simulation;
         if(this.controllable.getIsControlled()){
@@ -522,7 +520,7 @@ public class PIDController {
             }
 
             g_simulation[0][n-1] = this.controllable.getControlledVar();
-            g_simulation[0][n-1] = this.controllable.getDisturbedVar();
+            g_simulation[0][n-2] = this.controllable.getDisturbedVar();
 
 
             temp = this.controllable.getInitialValues();
@@ -538,8 +536,8 @@ public class PIDController {
                         this.controllable.simulateDisturbance(disturbances.dequeue()[1]);
                     }
                 }
-                g_simulation[step][n-2] = this.controllable.getControlledVar();
-                g_simulation[step][n-1] = this.controllable.getDisturbedVar();
+                g_simulation[step][n-1] = this.controllable.getControlledVar();
+                g_simulation[step][n-2] = this.controllable.getDisturbedVar();
 
 
                 // Get System output

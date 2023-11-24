@@ -9,7 +9,7 @@
  * @author Dylan
  * @version 2.3
  */
-public abstract class Reactor implements Controllable, DifferentialEquation {
+public abstract class Reactor implements Controllable, DifferentialEquation, Cloneable {
 
     private double volume; //reactor volume
     private Reaction reaction; //reaction taking place
