@@ -1,10 +1,9 @@
 //Complete
 /** Interface for controllable classes
  * @author Ogechi
- * @version 1.0
+ * @version 1.1
  */
 public interface Controllable {
-
 
 
     /**Returns the value of a Controllable object's controlled variable
@@ -53,6 +52,7 @@ public interface Controllable {
     /**Applies the disturbance to the controlled parameter of the Controllable object
      *
      * @param dist value of applied disturbance
+     * @author Ogechi
      */
     void simulateDisturbance(double dist);
     //void tunePIDParameters(); -> bonus

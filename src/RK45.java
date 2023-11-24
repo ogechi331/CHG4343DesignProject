@@ -1,5 +1,5 @@
 //Status: Complete
-
+//TODO add class summary javadoc
 public class RK45 {
 
     //IMPORTANT: these instance variables should not have getters and setters as they are helper variables, and could mess with calculations
@@ -191,6 +191,7 @@ public class RK45 {
 
     /**Main method used to test the validity of the RK45 solution
      * @param args
+     * @author Ogechi
      */
     public static void main(String[] args) {
         //main to test rk45. Known solution in 8 steps with output value of 5.305486816572746

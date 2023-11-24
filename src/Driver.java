@@ -1,4 +1,6 @@
 //Complete
+//Should we add some additional comments especially where code extends beyond this course?
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
@@ -28,6 +30,7 @@ public class Driver {
      *
      * @param args Command line arguments (not used).
      * @throws IOException If an error occurs during file reading or writing.
+     * @author Ogechi
      */
     public static void main(String[] args) throws IOException {
         Reaction reaction;
@@ -45,12 +48,12 @@ public class Driver {
 
 
         //attempt to initialize file population parameters from the populated dictionary
-        try{
+        try {
             fileOutName = dict.get("populate to file");
             header = dict.get("header").split(",");
         } catch(NullPointerException e){
             throw new IllegalArgumentException("Element of File population parameter information value is null");
-        }catch (PatternSyntaxException e){
+        } catch (PatternSyntaxException e){
             System.out.println("Ensure the list of headers are delimited by commas");
         }
 
@@ -66,7 +69,7 @@ public class Driver {
 
 
         //attempt to initialize Reactor parameters from the populated dictionary
-        try{
+        try {
             double V = Double.parseDouble(dict.get("volume"));
             double initialFlow = Double.parseDouble(dict.get("initial flow"));
             String[] str = dict.get("initial concentrations").split(SEPARATOR);
@@ -84,17 +87,17 @@ public class Driver {
             isControlled = Boolean.parseBoolean(dict.get("is controlled"));
             if (!isControlled){
                 cstrReactor = new CSTRReactor(V, initialFlow, reaction, initialConcentrations, inletConcentrations);
-            }else{
+            } else {
                 cstrReactor = new CSTRReactor(V, initialFlow, reaction, initialConcentrations, inletConcentrations, Integer.parseInt(dict.get("controlled")), true);
             }
 
-        }catch(NullPointerException e){
+        } catch (NullPointerException e){
             throw new IllegalArgumentException("Element of Reactor information value is null");
         } catch (NumberFormatException e){
             throw new IllegalArgumentException("inlet Concentrations and initial concentrations must consist of double values");
         }
 
-        try{
+        try {
 
             double startTime = Double.parseDouble(dict.get("start time"));
             double endTime = Double.parseDouble(dict.get("end time"));
@@ -121,7 +124,7 @@ public class Driver {
             }
             if(!isControlled){
                 pidController = new PIDController(startTime, endTime, timeStep, 0, 0, 0, PIDController.CONTROLLER_TYPE.UNCONTROLLED, 0, cstrReactor, tolerance, disturbances, 0);
-            }else{
+            } else {
                 pidController = new PIDController(startTime, endTime, timeStep,
                         Double.parseDouble(dict.get("controller gain")),
                         Double.parseDouble(dict.get("integrating time constant")),

@@ -1,11 +1,13 @@
-//Status: to be Reviewed
+//Status: to be Reviewed, needs some additions and standard methods like copy constructor and equals need to be fixed
+//all accessors and mutators present
+//do we need inlet concentrations? set and get not used
 //IMPORTANT: currentConcentrations may seem redundant because of inletConcentrations but both are actually needed.
 
 //TODO: clean up (ensure we have all getters and setters)
 /** Abstract parent class for reactor types
  * @author Alex
  * @author Dylan
- * @version 2.2
+ * @version 2.3
  */
 public abstract class Reactor implements Controllable, DifferentialEquation {
 
@@ -23,6 +25,8 @@ public abstract class Reactor implements Controllable, DifferentialEquation {
     private double currentFlow; //current flow rate
     private int currentSpeciesNumber; //
     private boolean isControlled;
+
+    //TODO add parameters to javadoc
 
     /** Constructor for the abstract reactor class
      *
@@ -81,6 +85,9 @@ public abstract class Reactor implements Controllable, DifferentialEquation {
      * @author Alex
      * @author Dylan
      */
+
+    //TODO finish copy constructor for all variables
+
     public Reactor(Reactor source)  {
         if (source==null) throw new IllegalArgumentException("Error, copy of null PIDController object");
 
@@ -200,6 +207,7 @@ public abstract class Reactor implements Controllable, DifferentialEquation {
      * @author Dylan
      */
     public boolean setInletConcentrations(double[] inletConcentrations) {
+        if (inletConcentrations==null) return false;
         for (int i=0; i<inletConcentrations.length; i++) {
             if (inletConcentrations[i]<0) return false;
         }
@@ -229,6 +237,7 @@ public abstract class Reactor implements Controllable, DifferentialEquation {
      * @author Dylan
      */
     public boolean setInitialConcentrations(double[] initialConcentrations) {
+        if (initialConcentrations==null) return false;
         for (int i=0; i<initialConcentrations.length; i++) {
             if (initialConcentrations[i]<0) return false;
         }
@@ -292,6 +301,7 @@ public abstract class Reactor implements Controllable, DifferentialEquation {
      * @return true when updated
      */
     public boolean setCurrentSpeciesNumber(int currentSpeciesNumber) {
+        if (currentSpeciesNumber<0) return false;
         this.currentSpeciesNumber=currentSpeciesNumber;
         return true;
     }
@@ -354,6 +364,7 @@ public abstract class Reactor implements Controllable, DifferentialEquation {
      * @author Dylan
      */
     public boolean equals(Object comparator){
+        //TODO check all instance variables
         if (comparator==null) return false;
         if (comparator.getClass()!=this.getClass()) return false;
 

@@ -1,4 +1,6 @@
 //Status: Complete
+//Why is this it's own class?
+//TODO add class summary javadoc
 public class Util {
     public static PIDController.CONTROLLER_TYPE getControllerTypeByLabel(String label){
         switch(label){

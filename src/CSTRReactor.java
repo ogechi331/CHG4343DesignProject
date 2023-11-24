@@ -94,31 +94,31 @@ public class CSTRReactor extends Reactor implements DifferentialEquation, Contro
         return solution;
 
     }
-
+//TODO add javadoc
     @Override
     public void simulateDisturbance(double dist) {
         double[] temp =super.getInitialConcentrations();
         temp[super.getControlled()] = dist;
         super.setInitialConcentrations(temp);
     }
-
+    //TODO add javadoc
     @Override
     public double getControlledVar() {
         double[] currentConcentrations = super.getCurrentConcentrations();
         return currentConcentrations[super.getControlled()];
     }
 
-
+    //TODO add javadoc
     @Override
     public double[] getInitialValues() {
         return super.getCurrentConcentrations();
     }
-
+    //TODO add javadoc
     @Override
     public boolean getIsControlled() {
         return super.getIsControlled();
     }
-
+    //TODO add javadoc
     @Override
     public void setManipulatedVariable(double var) {
         System.out.print(super.setInitialFlow(var));
@@ -131,7 +131,7 @@ public class CSTRReactor extends Reactor implements DifferentialEquation, Contro
      * @param x time
      * @param y array of ys for time t
      * @return Rate of change of the dependent variable with respect to the independent variable, here is change in concentration
-     *
+     * @author Ogechi
      */
     @Override
     public double apply(double x, double y) {
@@ -158,7 +158,7 @@ public class CSTRReactor extends Reactor implements DifferentialEquation, Contro
 
         return changeRate; //changed rate can be negative, need to check for negative concentration else where since they don't get changed here.
     }
-
+    //TODO add javadoc
     public double getDisturbedVar(){
         return super.getInitialConcentrations()[super.getControlled()];
     }
