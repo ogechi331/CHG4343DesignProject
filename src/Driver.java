@@ -137,6 +137,8 @@ public class Driver {
             throw new IllegalArgumentException("Element of PIDController information value is null");
         } catch (NumberFormatException e){
             throw new IllegalArgumentException("Ensure start time, end time, time step, tolerance, controller gain, integrating time constant derivative time constant, and dead time consist of double values");
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException(e);
         }
 
         double[][] simulation = pidController.simulate();
