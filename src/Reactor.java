@@ -7,7 +7,7 @@
 /** Abstract parent class for reactor types
  * @author Alex
  * @author Dylan
- * @version 2.3
+ * @version 2.4
  */
 public abstract class Reactor implements Controllable, DifferentialEquation, Cloneable {
 
@@ -86,25 +86,29 @@ public abstract class Reactor implements Controllable, DifferentialEquation, Clo
      * @author Dylan
      */
 
-    //TODO finish copy constructor for all variables
-
     public Reactor(Reactor source)  {
         if (source==null) throw new IllegalArgumentException("Error, copy of null PIDController object");
 
-        this.reaction= reaction.clone();
+        this.reaction = source.reaction.clone();
         this.volume=source.volume;
         this.initialFlow=source.initialFlow;
         this.currentFlow=source.currentFlow;
+        this.isControlled=source.isControlled;
+        this.currentSpeciesNumber=source.currentSpeciesNumber;
 
-        for(int i=0;i<initialConcentrations.length; i++){
+        this.initialConcentrations = new double[source.initialConcentrations.length];
+        for(int i=0;i<source.initialConcentrations.length; i++){
             this.initialConcentrations[i] = source.initialConcentrations[i];
         }
-        for(int i=0;i<inletConcentrations.length; i++){
+        this.inletConcentrations = new double[source.inletConcentrations.length];
+        for(int i=0;i<source.inletConcentrations.length; i++){
             this.inletConcentrations[i] = source.inletConcentrations[i];
         }
+        this.currentConcentrations = new double[source.currentConcentrations.length];
         for (int i=0; i<source.currentConcentrations.length;i++) {
             this.currentConcentrations[i] = source.currentConcentrations[i];
         }
+
     }
 
     /** Clone method for the abstract reactor class
