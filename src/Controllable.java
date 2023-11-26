@@ -5,7 +5,12 @@
  */
 public interface Controllable {
 
-
+    /**
+     * Returns the current value of the variable set to be manipulated by the PIDController.
+     *
+     * @return the current value of the manipulated variable.
+     */
+    double getManipulatedVar();
     /**Returns the value of a Controllable object's controlled variable
      * @return Controlled variable as double
      * @author Ogechi

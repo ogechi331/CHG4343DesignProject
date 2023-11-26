@@ -3,8 +3,8 @@ populate to file : PIDControlledCSTRResults
 
 volume : 1
 initial flow : 0.05
-initial concentrations : 0.2, 0
-inlet concentrations : 0.2, 0
+initial concentrations : 0.04, 0.16
+inlet concentrations : 0.04, 0.16
 controlled : 0
 is controlled : true
 

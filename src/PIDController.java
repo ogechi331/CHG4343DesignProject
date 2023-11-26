@@ -439,7 +439,7 @@ public class PIDController implements Cloneable{
             this.g_output = g_P;
 
             g_simulation[0][n-5] = this.controllable.getDisturbedVar();
-            g_simulation[0][n-4] = this.g_processVariable;
+            g_simulation[0][n-4] = this.controllable.getManipulatedVar();
             g_simulation[0][n-3] = this.g_P;
             g_simulation[0][n-2] = this.g_I;
             g_simulation[0][n-1] = this.g_D;
@@ -471,7 +471,7 @@ public class PIDController implements Cloneable{
                         this.controllable.setManipulatedVariable(queue.peek()[1]);
                         queue.dequeue();
                     } else {
-                        g_simulation[step][n - 4] = g_simulation[step - 1][n - 4];
+                        g_simulation[step][n - 4] = this.controllable.getManipulatedVar();
                     }
                 }
 
@@ -519,7 +519,7 @@ public class PIDController implements Cloneable{
                 g_simulation[0][i+1] = 0;
             }
 
-            g_simulation[0][n-1] = this.controllable.getControlledVar();
+            g_simulation[0][n-1] = this.controllable.getManipulatedVar();
             g_simulation[0][n-2] = this.controllable.getDisturbedVar();
 
 
@@ -536,7 +536,7 @@ public class PIDController implements Cloneable{
                         this.controllable.simulateDisturbance(disturbances.dequeue()[1]);
                     }
                 }
-                g_simulation[step][n-1] = this.controllable.getControlledVar();
+                g_simulation[step][n-1] = this.controllable.getManipulatedVar();
                 g_simulation[step][n-2] = this.controllable.getDisturbedVar();
 
 
