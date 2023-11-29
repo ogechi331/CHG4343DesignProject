@@ -67,6 +67,9 @@ public abstract class Reactor implements Controllable, DifferentialEquation, Clo
         for(int i=0;i<initialConcentrations.length; i++){
             this.initialConcentrations[i] = initialConcentrations[i];
         }
+
+        if(initialConcentrations.length!=inletConcentrations.length) throw new IllegalArgumentException("Initial Concentrations and Inlet Concentrations must be the same legnth");
+
         this.controlled = controlled;
         this.currentFlow = 0; //for controller’s sake?
         this.currentConcentrations = new double[initialConcentrations.length];
@@ -215,7 +218,11 @@ public abstract class Reactor implements Controllable, DifferentialEquation, Clo
         for (int i=0; i<inletConcentrations.length; i++) {
             if (inletConcentrations[i]<0) return false;
         }
-        this.inletConcentrations = inletConcentrations;
+
+        this.inletConcentrations = new double[inletConcentrations.length];
+        for (int i =0;i<inletConcentrations.length;i++) {
+            this.inletConcentrations[i] =inletConcentrations[i];
+        }
         return true;
     }
 
@@ -245,7 +252,10 @@ public abstract class Reactor implements Controllable, DifferentialEquation, Clo
         for (int i=0; i<initialConcentrations.length; i++) {
             if (initialConcentrations[i]<0) return false;
         }
-        this.initialConcentrations = initialConcentrations;
+        this.initialConcentrations = new double[initialConcentrations.length];
+        for (int i =0;i<initialConcentrations.length;i++) {
+            this.initialConcentrations[i] =initialConcentrations[i];
+        }
         return true;
     }
 
@@ -354,6 +364,8 @@ public abstract class Reactor implements Controllable, DifferentialEquation, Clo
         for (int i=0;i<currentConcentrations.length;i++) {
             if (currentConcentrations[i]<0 ) return false;
         }
+
+        this.currentConcentrations = new double[currentConcentrations.length];
         for (int i =0;i<currentConcentrations.length;i++) {
             this.currentConcentrations[i] =currentConcentrations[i];
         }
@@ -378,6 +390,12 @@ public abstract class Reactor implements Controllable, DifferentialEquation, Clo
         if(!(reactorComparator.reaction.equals(this.reaction))) return false;
         if (reactorComparator.inletConcentrations.length!=this.inletConcentrations.length) return false;
         if (reactorComparator.initialConcentrations.length!=this.initialConcentrations.length) return false;
+        if (reactorComparator.currentConcentrations!=this.currentConcentrations) return false;
+        if(reactorComparator.currentFlow!=this.currentFlow) return false;
+
+        for (int i = 0; i<this.currentConcentrations.length; i++) {
+            if (reactorComparator.currentConcentrations[i]!=this.currentConcentrations[i]) return false;
+        }
 
         for (int i = 0; i<this.inletConcentrations.length; i++) {
             if (reactorComparator.inletConcentrations[i]!=this.inletConcentrations[i]) return false;
