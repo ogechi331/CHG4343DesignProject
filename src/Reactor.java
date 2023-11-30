@@ -78,6 +78,7 @@ public abstract class Reactor implements Controllable, DifferentialEquation, Clo
 
         //TODO should we be initially setting currentConcentrations?
 
+
     }
 
     /** Copy constructor for the abstract reactor class
