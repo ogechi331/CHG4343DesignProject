@@ -3,7 +3,6 @@
 //do we need inlet concentrations? set and get not used
 //IMPORTANT: currentConcentrations may seem redundant because of inletConcentrations but both are actually needed.
 
-//TODO: clean up (ensure we have all getters and setters)
 /** Abstract parent class for reactor types
  * @author Alex
  * @author Dylan
@@ -21,12 +20,11 @@ public abstract class Reactor implements Controllable, DifferentialEquation, Clo
 
     private double initialFlow; //initial flow rate
 
-    private int controlled;
+    private int controlled; //the controlled variable in order with 0 as the first species
     private double currentFlow; //current flow rate
-    private int currentSpeciesNumber; //
-    private boolean isControlled;
+    private int currentSpeciesNumber; //starting with 0 the species to update
+    private boolean isControlled; //boolean for controlled vs uncontrolled
 
-    //TODO add parameters to javadoc
 
     /** Constructor for the abstract reactor class
      *
@@ -35,6 +33,8 @@ public abstract class Reactor implements Controllable, DifferentialEquation, Clo
      * @param reaction reaction object representing the reactor in the reactor
      * @param initialConcentrations initial concentrations of species in the reactor
      * @param inletConcentrations inlet concentrations to the reactor after step change
+     * @param controlled the controlled variable in order with 0 as the first species
+     * @param isControlled true if controlled system and false if uncontrolled
      * @throws IllegalArgumentException if volume<0, initial flow<0, concentrations<0, inlet concentrations<0, and if reaction, initial concentrations or initial concentrations are null
      * @author Alex
      * @author Dylan
@@ -75,6 +75,8 @@ public abstract class Reactor implements Controllable, DifferentialEquation, Clo
         }
         this.currentSpeciesNumber = 0;
         this.isControlled = isControlled;
+
+        //TODO should we be initially setting currentConcentrations?
 
     }
 
@@ -368,7 +370,6 @@ public abstract class Reactor implements Controllable, DifferentialEquation, Clo
      * @author Dylan
      */
     public boolean equals(Object comparator){
-        //TODO check all instance variables
         if (comparator==null) return false;
         if (comparator.getClass()!=this.getClass()) return false;
 
@@ -378,6 +379,7 @@ public abstract class Reactor implements Controllable, DifferentialEquation, Clo
         if(!(reactorComparator.reaction.equals(this.reaction))) return false;
         if (reactorComparator.inletConcentrations.length!=this.inletConcentrations.length) return false;
         if (reactorComparator.initialConcentrations.length!=this.initialConcentrations.length) return false;
+        if (reactorComparator.currentConcentrations.length!=this.currentConcentrations.length) return false;
 
         for (int i = 0; i<this.inletConcentrations.length; i++) {
             if (reactorComparator.inletConcentrations[i]!=this.inletConcentrations[i]) return false;
@@ -387,7 +389,14 @@ public abstract class Reactor implements Controllable, DifferentialEquation, Clo
             if (reactorComparator.initialConcentrations[i]!=this.initialConcentrations[i]) return false;
         }
 
+        for (int i = 0; i<this.currentConcentrations.length; i++) {
+            if (reactorComparator.currentConcentrations[i]!=this.currentConcentrations[i]) return false;
+        }
+
         if (reactorComparator.initialFlow != this.initialFlow) return false;
+        if (reactorComparator.currentFlow != this.currentFlow) return false;
+        if (reactorComparator.currentSpeciesNumber != this.currentSpeciesNumber) return false;
+        if (reactorComparator.isControlled != this.isControlled) return false;
 
         return true;
 

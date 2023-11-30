@@ -5,8 +5,6 @@
  * @version 2.0
  */
 
-//TODO: Fix global variables
-//TODO: clean up (ensure we have all getters, setters)
 public class PIDController implements Cloneable{
 
     public enum CONTROLLER_TYPE {
@@ -29,12 +27,10 @@ public class PIDController implements Cloneable{
     private double g_D; //derivative part of the controller
     private double g_pastD; //past derivative part of the controller
     private double g_processVariable;
-    private double g_setPoint;
+    private double setPoint;
     private double g_output;
     private double deadTime; //dead time
-
     private double g_previousTime;
-
     private Controllable controllable;
     private Queue<double[]> disturbances;
 
@@ -49,16 +45,19 @@ public class PIDController implements Cloneable{
      * @param controllerType controller type which must be a type of PID or uncontrolled
      * @param deadTime dead time for PID controller
      * @param tolerance tolerance for error between RK4 and RK5 method
+     * @param disturbances changes to steady state
+     * @param setPoint Set point for the controller
      * @throws IllegalArgumentException if end time is before start time or time step is too large for the range given (<1 step) or if controller type is null or if dead time is negative or if tolerance not greater than 0
      * @author Dylan
      */
-    public PIDController(double startTime, double endTime, double timeStep, double controllerGain, double integratingTimeConstant, double derivativeTimeConstant, CONTROLLER_TYPE controllerType, double deadTime, Controllable controllable, double tolerance, Queue<double[]> disturbances, double g_setPoint) throws CloneNotSupportedException {
-
+    public PIDController(double startTime, double endTime, double timeStep, double controllerGain, double integratingTimeConstant, double derivativeTimeConstant, CONTROLLER_TYPE controllerType, double deadTime, Controllable controllable, double tolerance, Queue<double[]> disturbances, double setPoint) throws CloneNotSupportedException {
+        //TODO why does this throw clonenotsupported exception?
         if (controllerType==null) throw new IllegalArgumentException("Controller type cannot be null");
         if (endTime<startTime) throw new IllegalArgumentException("Error end time must be larger than start time");
         if (timeStep>(endTime-startTime)) throw new IllegalArgumentException("Error time step is too large for time range");
         if (deadTime<0) throw new IllegalArgumentException("Dead time must be greater than or equal to 0");
         if (tolerance<0 || tolerance==0) throw new IllegalArgumentException("Tolerance must be greater than 0");
+        if (controllerGain<0 || integratingTimeConstant<0 || derivativeTimeConstant<0) throw new IllegalArgumentException("Controller parameters KC, 𝛕I, and 𝛕D must be greater than 0");
 
         this.startTime = startTime;
         this.endTime = endTime;
@@ -72,8 +71,10 @@ public class PIDController implements Cloneable{
         this.controllable = controllable.clone();
         this.tolerance=tolerance;
         this.disturbances = disturbances;
-        this.g_setPoint = g_setPoint;
+        this.setPoint = setPoint;
+        resetGlobalVariables();
         this.g_previousTime = startTime;
+        //TODO whatever we need to do with the queue
 
     }
 
@@ -102,10 +103,12 @@ public class PIDController implements Cloneable{
         this.g_D=source.g_D;
         this.g_pastD=source.g_pastD;
         this.g_processVariable=source.g_processVariable;
-        this.g_setPoint=source.g_setPoint;
+        this.setPoint=source.setPoint;
         this.g_output=source.g_output;
         this.disturbances = source.disturbances; //needs to be correctly cloned later
-        //TODO add previous time
+        this.g_previousTime=source.g_previousTime;
+        this.controllable=source.controllable;
+        //TODO whatever we need to do with the queue
     }
 
     /** Clone method to call the copy constructor
@@ -120,6 +123,25 @@ public class PIDController implements Cloneable{
         } catch(IllegalArgumentException e){
             throw new IllegalArgumentException("Failed to clone CSTRControllerPID: "+ e.getMessage());
         }
+    }
+
+    /** Accessor method for set point
+     *
+     * @return set point
+     * @author Dylan
+     */
+    public double getSetPoint() {
+        return this.setPoint;
+    }
+
+    /** Mutator method for set point
+     *
+     * @param setPoint set point for the process
+     * @return true when updated
+     */
+    public boolean setSetPoint (double setPoint) {
+        this.setPoint=setPoint;
+        return true;
     }
 
     /** Accessor method for start time
@@ -304,11 +326,14 @@ public class PIDController implements Cloneable{
      */
     //FIXME: ensure we have Global Variables that make sense for user
     protected void resetGlobalVariables() { //TODO: should we really reset P, I, D and setPoint, these are identified by the use  and could be used again?
+        this.g_P=0;
+        this.g_I=0;
+        this.g_D=0;
         this.g_pastI=0;
         this.g_pastD=0;
         this.g_processVariable=0;
         this.g_output=0;
-        this.g_previousTime=this.startTime;
+        this.g_previousTime=0;
     }
 
     /** Equals method
@@ -336,9 +361,10 @@ public class PIDController implements Cloneable{
         if (specificComparator.g_D!=this.g_D) return false;
         if (specificComparator.g_pastD!=this.g_pastD) return false;
         if (specificComparator.g_processVariable!=this.g_processVariable) return false;
-        if (specificComparator.g_setPoint!=this.g_setPoint) return false;
+        if (specificComparator.setPoint!=this.setPoint) return false;
         if (specificComparator.g_output!=this.g_output) return false;
         if (specificComparator.g_previousTime!=this.g_previousTime) return false;
+        //TODO whatever we need to do with the queue
 
         return true;
     }
@@ -434,7 +460,7 @@ public class PIDController implements Cloneable{
             }
 
             this.g_processVariable = this.controllable.getControlledVar();
-            simulateProportionalStep(g_setPoint - g_processVariable);
+            simulateProportionalStep(setPoint - g_processVariable);
 
             this.g_output = g_P;
 
@@ -452,7 +478,7 @@ public class PIDController implements Cloneable{
 
             while (step < numberOfSteps) {
                 g_simulation[step][0] = this.g_previousTime + this.timeStep;
-                error = this.g_setPoint - this.g_processVariable;
+                error = this.setPoint - this.g_processVariable;
                 simulateProportionalStep(error);
                 simulateIntegralStep(error);
 

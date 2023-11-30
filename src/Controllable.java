@@ -66,5 +66,4 @@ public interface Controllable {
      * @see Cloneable
      */
     Controllable clone() throws CloneNotSupportedException;
-    //void tunePIDParameters(); -> bonus
 }

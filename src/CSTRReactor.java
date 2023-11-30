@@ -23,6 +23,7 @@ public class CSTRReactor extends Reactor {
      */
     public CSTRReactor(double V, double initialFlow, Reaction reaction, double[] initialConcentrations, double[] inletConcentrations) {
         super(V, initialFlow, reaction, initialConcentrations, inletConcentrations, 0, false);
+        //TODO why do we have a separate constructor for uncontrolled?
     }
     /** Constructor for Controlled CSTR reactor
      *

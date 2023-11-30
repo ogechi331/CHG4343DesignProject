@@ -2,7 +2,7 @@
 //TODO add class summary javadoc
 public class RK45 {
 
-    //IMPORTANT: these instance variables should not have getters and setters as they are helper variables, and could mess with calculations
+    //IMPORTANT: these static instance variables should not have getters and setters as they are helper variables, and could mess with calculations
     private static double[] k1;
     private static double[] k2;
     private static double[] k3;
@@ -17,6 +17,7 @@ public class RK45 {
      * @param y array of dependent variables of differential equation
      * @param h height of integration step
      * @param equation Array of differential equations to be solved
+     * @deprecated rk4 has been replaced with rk45 with adaptive step size
      * @return Array of y at next step value for each differential equation
      * @author Ogechi
      */
@@ -60,14 +61,14 @@ public class RK45 {
      * Applies the Runge-Kutta-Fehlberg method for solving ordinary differential equations
      * with adaptive step size control.
      *
-     * @param x             Current time.
-     * @param y             Array of initial values for dependent variables.
-     * @param h             Initial step size.
-     * @param equation      Array of differential equations defining the system.
-     * @param tolerance     Tolerance for adaptive step size control.
-     * @param endTime       End time for the simulation.
-     * @return              A linked list containing the final values of dependent variables, the next step size, and the step size used for the current calculation.
-     * @author              Ogechi
+     * @param x Current time.
+     * @param y Array of initial values for dependent variables.
+     * @param h Initial step size.
+     * @param equation Array of differential equations defining the system.
+     * @param tolerance Tolerance for adaptive step size control.
+     * @param endTime End time for the simulation.
+     * @return A linked list containing the final values of dependent variables, the next step size, and the step size used for the current calculation.
+     * @author Ogechi
      */
     private static SinglyLinkedList<Object> rk45Step(double x, double[] y, double h, DifferentialEquation[] equation, double tolerance, double endTime) {
 
