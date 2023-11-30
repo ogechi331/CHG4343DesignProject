@@ -163,4 +163,9 @@ public class CSTRReactor extends Reactor {
     public double getDisturbedVar(){
         return super.getInitialConcentrations()[super.getControlled()];
     }
+
+    @Override
+    public double getManipulatedVar() {
+        return super.getInitialFlow();
+    }
 }
