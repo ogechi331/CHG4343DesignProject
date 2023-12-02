@@ -1,8 +1,6 @@
-//REVIEW : to be Reviewed
 /** Class for PID control loops for transient processes
  * @author Dylan
  * @author Ogechi
- * @version 2.0
  */
 
 public class PIDController implements Cloneable{
@@ -51,7 +49,6 @@ public class PIDController implements Cloneable{
      * @author Dylan
      */
     public PIDController(double startTime, double endTime, double timeStep, double controllerGain, double integratingTimeConstant, double derivativeTimeConstant, CONTROLLER_TYPE controllerType, double deadTime, Controllable controllable, double tolerance, Queue<double[]> disturbances, double setPoint) throws CloneNotSupportedException {
-        //TODO why does this throw clonenotsupported exception?
         if (controllerType==null) throw new IllegalArgumentException("Controller type cannot be null");
         if (endTime<startTime) throw new IllegalArgumentException("Error end time must be larger than start time");
         if (timeStep>(endTime-startTime)) throw new IllegalArgumentException("Error time step is too large for time range");
@@ -70,11 +67,10 @@ public class PIDController implements Cloneable{
         this.deadTime = deadTime;
         this.controllable = controllable.clone();
         this.tolerance=tolerance;
-        this.disturbances = disturbances;
+        this.disturbances = disturbances; //TODO clone queue
         this.setPoint = setPoint;
         resetGlobalVariables();
         this.g_previousTime = startTime;
-        //TODO whatever we need to do with the queue
 
     }
 
@@ -105,10 +101,9 @@ public class PIDController implements Cloneable{
         this.g_processVariable=source.g_processVariable;
         this.setPoint=source.setPoint;
         this.g_output=source.g_output;
-        this.disturbances = source.disturbances; //needs to be correctly cloned later
+        this.disturbances = source.disturbances; //TODO clone queue
         this.g_previousTime=source.g_previousTime;
         this.controllable=source.controllable;
-        //TODO whatever we need to do with the queue
     }
 
     /** Clone method to call the copy constructor
@@ -324,8 +319,7 @@ public class PIDController implements Cloneable{
     /** Reset method for global variables
      * @author Dylan
      */
-    //FIXME: ensure we have Global Variables that make sense for user
-    protected void resetGlobalVariables() { //TODO: should we really reset P, I, D and setPoint, these are identified by the use  and could be used again?
+    protected void resetGlobalVariables() {
         this.g_P=0;
         this.g_I=0;
         this.g_D=0;
@@ -364,7 +358,7 @@ public class PIDController implements Cloneable{
         if (specificComparator.setPoint!=this.setPoint) return false;
         if (specificComparator.g_output!=this.g_output) return false;
         if (specificComparator.g_previousTime!=this.g_previousTime) return false;
-        //TODO whatever we need to do with the queue
+        //TODO use queue equals method
 
         return true;
     }
@@ -428,20 +422,17 @@ public class PIDController implements Cloneable{
     /** Method to simulate PID controller
      * @author Ogechi
      * @author Dylan
+     * @return double array holding simulation results
+     * Array holding Simulation results each row contains the simulation values at the given time
+     * simulation[0] : Time
+     * simulation[1 to n-6]: controllable output values
+     * simulation [n-5] : disturbed variable
+     * simulation [n-4] : manipulated variable
+     * simulation [n-3] : P
+     * simulation [n-2] : I
+     * simulation [n-1] : D
      */
     public double[][] simulate(){
-
-        /*Array holding Simulation results each row contains the simulation values at the given time
-         * simulation[0] : Time
-         * simulation[1 to n-6]: controllable output values
-         * simulation [n-5] : disturbed variable
-         * simulation [n-4] : manipulated variable
-         * simulation [n-3] : P
-         * simulation [n-2] : I
-         * simulation [n-1] : D
-         *
-         */
-
 
         double[][] g_simulation;
         if(this.controllable.getIsControlled()){
@@ -588,6 +579,41 @@ public class PIDController implements Cloneable{
         }
         resetGlobalVariables();
         return g_simulation;
+    }
+
+    /** Method to take controller type string from file and return enumerated type. Will return uncontrolled if not a subset of PID
+     *
+     * @param label takes controller type string
+     * @return controller enumerated type
+     * @author Ogechi
+     * @author Dylan
+     */
+    public static PIDController.CONTROLLER_TYPE getControllerTypeByLabel(String label){
+        switch(label){
+            case "P":
+                return PIDController.CONTROLLER_TYPE.P;
+
+            case "PI":
+                return PIDController.CONTROLLER_TYPE.PI;
+
+            case "PID":
+                return PIDController.CONTROLLER_TYPE.PID;
+
+            case "I":
+                return PIDController.CONTROLLER_TYPE.I;
+
+            case "ID":
+                return PIDController.CONTROLLER_TYPE.ID;
+
+            case "D":
+                return PIDController.CONTROLLER_TYPE.D;
+
+            case "PD":
+                return PIDController.CONTROLLER_TYPE.PD;
+
+            default:
+                return PIDController.CONTROLLER_TYPE.UNCONTROLLED;
+        }
     }
 
 

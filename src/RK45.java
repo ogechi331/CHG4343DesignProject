@@ -1,5 +1,10 @@
-//Status: Complete
-//TODO add class summary javadoc
+/** ODE Solver Class with RK45 with adaptive step size
+ * Also has a deprecated RK4 method previously used
+ * A main method is included to solve an initial value problem with an analytical solution to validate the ODE solver methods included
+ * All variables and methods in this class are static
+ * @author Ogechi
+ * @author Dylan
+ */
 public class RK45 {
 
     //IMPORTANT: these static instance variables should not have getters and setters as they are helper variables, and could mess with calculations

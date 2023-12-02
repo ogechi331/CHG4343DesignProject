@@ -1,13 +1,9 @@
-//Status: in Review
-//TODO: clean up (ensure we have all getters, setters, delete unnecessary variables)
 /** Concrete class for the CSTR reactor
  * @author Alex
  * @author Dylan
  * @author Ogechi
- * @version 2.2
  */
 public class CSTRReactor extends Reactor {
-
 
     /** Constructor for Uncontrolled CSTR reactor
      *
@@ -23,7 +19,6 @@ public class CSTRReactor extends Reactor {
      */
     public CSTRReactor(double V, double initialFlow, Reaction reaction, double[] initialConcentrations, double[] inletConcentrations) {
         super(V, initialFlow, reaction, initialConcentrations, inletConcentrations, 0, false);
-        //TODO why do we have a separate constructor for uncontrolled?
     }
     /** Constructor for Controlled CSTR reactor
      *
@@ -95,36 +90,52 @@ public class CSTRReactor extends Reactor {
         return solution;
 
     }
-//TODO add javadoc
+    /**Applies the disturbance to the controlled parameter of the Controllable object
+     *
+     * @param dist value of applied disturbance
+     * @author Ogechi
+     */
     @Override
     public void simulateDisturbance(double dist) {
         double[] temp =super.getInitialConcentrations();
         temp[super.getControlled()] = dist;
         super.setInitialConcentrations(temp);
     }
-    //TODO add javadoc
+    /**Returns the value of a Controllable object's controlled variable
+     * @return Controlled variable as double
+     * @author Ogechi
+     */
     @Override
     public double getControlledVar() {
         double[] currentConcentrations = super.getCurrentConcentrations();
         return currentConcentrations[super.getControlled()];
     }
-
-    //TODO add javadoc
+    /**Returns the Initial Values at the current state of the Controllable Object.
+     *
+     * @return Array of Controllable's Initial Values
+     * @author Ogechi
+     */
     @Override
     public double[] getInitialValues() {
         return super.getCurrentConcentrations();
     }
-    //TODO add javadoc
+
+    /***Returns true if the Controllable object is set to be controlled and false otherwise
+     *
+     * @return boolean state of Controlled object
+     * @author Ogechi
+     */
     @Override
     public boolean getIsControlled() {
         return super.getIsControlled();
     }
-    //TODO add javadoc
+    /**Updates the value of the Manipulated Variable in the Controllable object
+     * @param var value of the updated Manipulated Variable
+     *@author Ogechi
+     */
     @Override
     public void setManipulatedVariable(double var) {
-        System.out.print(super.setInitialFlow(var));
-        System.out.println(" " + super.getCurrentFlow()+" : "+var); //temporary print statements for testing -> delete later
-
+        super.setInitialFlow(var);
     }
 
     /** Applied function to calculate in RK45
@@ -159,7 +170,10 @@ public class CSTRReactor extends Reactor {
 
         return changeRate; //changed rate can be negative, need to check for negative concentration else where since they don't get changed here.
     }
-    //TODO add javadoc
+    /**Returns the value of the variable eligible to be disturbed in the Controllable object
+     * @return value of disturbed variable
+     * @author Ogechi
+     */
     public double getDisturbedVar(){
         return super.getInitialConcentrations()[super.getControlled()];
     }

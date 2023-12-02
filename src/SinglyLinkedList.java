@@ -1,5 +1,3 @@
-//Status: Complete
-
 /**
  * Implementation of a Generic singly linked list.
  *

@@ -1,6 +1,3 @@
-//Complete
-//Should we add some additional comments especially where code extends beyond this course?
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
@@ -40,7 +37,7 @@ public class Driver {
         PIDController pidController;
         String SEPARATOR = ",";
         Scanner scanner = new Scanner(System.in);
-        System.out.println("Enter file name: ");
+        System.out.println("Enter file path for information input (i.e. src/TestCase2_PI): ");
         String fileName = scanner.nextLine();
         scanner.close();
         String fileOutName = null;
@@ -129,7 +126,7 @@ public class Driver {
                         Double.parseDouble(dict.get("controller gain")),
                         Double.parseDouble(dict.get("integrating time constant")),
                         Double.parseDouble(dict.get("derivative time constant")),
-                        Util.getControllerTypeByLabel(dict.get("controller type")),
+                        PIDController.getControllerTypeByLabel(dict.get("controller type")),
                         Double.parseDouble(dict.get("dead time")),
                         cstrReactor, tolerance,disturbances,
                         Double.parseDouble(dict.get("set point")));
@@ -147,7 +144,7 @@ public class Driver {
         double[][] simulation = pidController.simulate();
 
         populateToFile(fileOutName, simulation, header);
-
+        System.out.println("CSV file output generated or overwritten called: " + fileOutName + ".csv");
     }
 
     /**

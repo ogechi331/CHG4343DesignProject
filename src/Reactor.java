@@ -1,12 +1,9 @@
-//Status: to be Reviewed, needs some additions and standard methods like copy constructor and equals need to be fixed
-//all accessors and mutators present
-//do we need inlet concentrations? set and get not used
 //IMPORTANT: currentConcentrations may seem redundant because of inletConcentrations but both are actually needed.
 
 /** Abstract parent class for reactor types
  * @author Alex
  * @author Dylan
- * @version 2.4
+ *
  */
 public abstract class Reactor implements Controllable, DifferentialEquation, Cloneable {
 
@@ -68,17 +65,13 @@ public abstract class Reactor implements Controllable, DifferentialEquation, Clo
             this.initialConcentrations[i] = initialConcentrations[i];
         }
         this.controlled = controlled;
-        this.currentFlow = 0; //for controller’s sake?
+        this.currentFlow = 0; //for controller’s sake
         this.currentConcentrations = new double[initialConcentrations.length];
         for (int i =0; i<initialConcentrations.length;i++) {
             this.currentConcentrations[i]=initialConcentrations[i];
         }
         this.currentSpeciesNumber = 0;
         this.isControlled = isControlled;
-
-        //TODO should we be initially setting currentConcentrations?
-
-
     }
 
     /** Copy constructor for the abstract reactor class

@@ -1,8 +1,6 @@
-//Complete
 /** Interface for classes with a differential equation to solve
  * @author Ogechi
  * @author Dylan
- * @version 2.0
  */
 public interface DifferentialEquation {
     /** Applies the differential equation to calculate the rate of change of the dependent variable with respect to the independent variable.

@@ -1,7 +1,5 @@
-//Complete
 /** Interface for controllable classes
  * @author Ogechi
- * @version 1.1
  */
 public interface Controllable {
 

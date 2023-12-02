@@ -12,14 +12,14 @@ reaction equation : A -> B
 k : 0.2
 
 controller type : PID
-start time : -0.1
+start time : -0.05
 end time : 1000
-time step : 0.1
+time step : 0.05
 controller gain : 9.4375
 integrating time constant : 1.807836
 derivative time constant : 0.27027
 tolerance : 0.01
 set point : 0.04
-dead time: 0
+dead time: 0.75
 disturbances : 0, 1.2
 

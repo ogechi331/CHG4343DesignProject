@@ -1,5 +1,5 @@
 header : Time, CA, CB,CAO, v0
-populate to file : UncontrolledCSTRResults
+populate to file : TestCase1_Uncontrolled_Results
 
 volume : 1
 initial flow : 0.05
@@ -9,8 +9,8 @@ controlled : 0
 is controlled : false
 reaction equation : A -> B
 k : 0.2
-start time : -0.1
-end time : 500
+start time : -0.05
+end time : 1000
 time step : 0.50
 tolerance : 0.01
 disturbances : 0, 0.2

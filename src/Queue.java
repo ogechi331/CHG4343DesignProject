@@ -1,5 +1,3 @@
-//Status: Complete
-
 /**
  * Implementation of a generic queue using a singly linked list.
  *
@@ -55,4 +53,6 @@ public class Queue<E>{
      */
     public boolean isEmpty(){return queue.isEmpty();}
 
+    //TODO Add Equals method
+    //TODO add clone method/copy constructor
 }
