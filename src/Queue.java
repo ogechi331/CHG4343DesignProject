@@ -53,6 +53,22 @@ public class Queue<E>{
      */
     public boolean isEmpty(){return queue.isEmpty();}
 
-    //TODO Add Equals method
-    //TODO add clone method/copy constructor
+    public Queue(Queue<E> source){
+        this.queue = new SinglyLinkedList<>(source.queue);
+    }
+    public Queue<E> clone(){
+        return new Queue<E>(this);
+    }
+
+    @Override
+    public boolean equals(Object comparator) {
+        if (comparator == null || comparator.getClass() != this.getClass()) return false;
+        try {
+            return this.queue.equals(((Queue<?>) comparator).queue);
+        }
+        catch (ClassCastException e){
+            return false;
+        }
+    }
+
 }

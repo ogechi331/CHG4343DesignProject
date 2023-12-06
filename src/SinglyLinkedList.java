@@ -267,7 +267,55 @@ public class SinglyLinkedList <E> {
     public boolean removeLast() {
         return deleteAt(this.size - 1);
     }
+    public SinglyLinkedList(int size, Node<E> head) {
+        this.size = size;
+        this.head = head;
+    }
+    public SinglyLinkedList(SinglyLinkedList<E> source){
+        Node<E> prev = source.head;
+        Node<E> temp = null;
+        Node<E> first = null;
 
+        while(prev != null){
+            Node<E> node = new Node<>(prev.element, null);
+            if (first == null){
+                first = node;
+                temp = first;
+            } else{
+                temp.next = node;
+                temp = temp.next;
+            }
+            prev = prev.next;
+        }
+        this.head = first;
+        this.size = source.size;
+    }
 
+    //TODO: test equals method
+    @Override
+    public boolean equals(Object comparator) {
+        try {
+            SinglyLinkedList<?> otherList = (SinglyLinkedList<?>) comparator;
+
+            // Rest of the comparison logic...
+            // Compare the elements of the two lists
+            Node<E> currentThis = this.head;
+            Node<?> currentOther = otherList.head;
+
+            while (currentThis != null && currentOther != null) {
+                if (!currentThis.element.equals(currentOther.element)) {
+                    return false; // Elements are not equal
+                }
+                currentThis = currentThis.next;
+                currentOther = currentOther.next;
+            }
+
+            // Check if both lists have the same size
+            return currentThis == null && currentOther == null;
+
+        } catch (ClassCastException e) {
+            return false; // Incompatible types, objects are not equal
+        }
+    }
 
 }

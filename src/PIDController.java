@@ -67,7 +67,7 @@ public class PIDController implements Cloneable{
         this.deadTime = deadTime;
         this.controllable = controllable.clone();
         this.tolerance=tolerance;
-        this.disturbances = disturbances; //TODO clone queue
+        this.disturbances = disturbances.clone();
         this.setPoint = setPoint;
         resetGlobalVariables();
         this.g_previousTime = startTime;
@@ -101,7 +101,7 @@ public class PIDController implements Cloneable{
         this.g_processVariable=source.g_processVariable;
         this.setPoint=source.setPoint;
         this.g_output=source.g_output;
-        this.disturbances = source.disturbances; //TODO clone queue
+        this.disturbances = source.disturbances.clone(); //TODO test clone method
         this.g_previousTime=source.g_previousTime;
         this.controllable=source.controllable;
     }
@@ -358,9 +358,8 @@ public class PIDController implements Cloneable{
         if (specificComparator.setPoint!=this.setPoint) return false;
         if (specificComparator.g_output!=this.g_output) return false;
         if (specificComparator.g_previousTime!=this.g_previousTime) return false;
-        //TODO use queue equals method
+        return (disturbances.equals(((PIDController) comparator).disturbances)); //TODO check Queue equals method
 
-        return true;
     }
 
     /** Simulation for proportional part of PID controller function for all steps
