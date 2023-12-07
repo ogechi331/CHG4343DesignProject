@@ -226,11 +226,12 @@ public class PIDController implements Cloneable{
 
     /** Mutator method for controller gain KC
      *
-     * @param controllerGain controller gain KC
+     * @param controllerGain controller gain KC which must be >0
      * @return true if updated and false if not
      * @author Dylan
      */
     public boolean setControllerGain(double controllerGain) {
+        if (controllerGain<0) return false;
         this.controllerGain = controllerGain;
         return true;
     }
@@ -246,11 +247,12 @@ public class PIDController implements Cloneable{
 
     /** Mutator method for integrating time constant tau I
      *
-     * @param integratingTimeConstant takes integrating time constant tau I
+     * @param integratingTimeConstant takes integrating time constant tau I which must be >0
      * @return true if updated and false if not
      * @author Dylan
      */
     public boolean setIntegratingTimeConstant(double integratingTimeConstant) {
+        if (integratingTimeConstant<0) return false;
         this.integratingTimeConstant = integratingTimeConstant;
         return true;
     }
@@ -266,11 +268,12 @@ public class PIDController implements Cloneable{
 
     /** Mutator method for derivative time constant tau D
      *
-     * @param derivativeTimeConstant derivative time constant tau D
+     * @param derivativeTimeConstant derivative time constant tau D which must be >0
      * @return true if updated and false if not
      * @author Dylan
      */
     public boolean setDerivativeTimeConstant(double derivativeTimeConstant) {
+        if (derivativeTimeConstant<0) return false;
         this.derivativeTimeConstant = derivativeTimeConstant;
         return true;
     }
@@ -313,6 +316,27 @@ public class PIDController implements Cloneable{
     public boolean setDeadTime (double deadTime) {
         if (deadTime<0) return false;
         this.deadTime=deadTime;
+        return true;
+    }
+
+    /** Accessor method for tolerance
+     *
+     * @return tolerance
+     * @author Dylan
+     */
+    public double getTolerance() {
+        return this.tolerance;
+    }
+
+    /** Mutator method for tolerance
+     *
+     * @param tolerance must be >0
+     * @return true if updated, false if not
+     * @author Dylan
+     */
+    public boolean setTolerance (double tolerance) {
+        if (tolerance<0) return false;
+        this.tolerance=tolerance;
         return true;
     }
 
