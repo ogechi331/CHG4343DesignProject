@@ -78,7 +78,9 @@ public class Reaction implements Cloneable{
     /** Accessor method for limiting reactant
      *
      * @return limiting reactant species
+     * @deprecated our CSTR class uses a mol balance but maintained for other applications
      * @author Ogechi
+     * @athor Dylan
      */
     public Species getLimitingReactant() {
         return limitingReactant.clone();
@@ -113,6 +115,7 @@ public class Reaction implements Cloneable{
      *
      * @param limitingReactant limiting reactant species
      * @return true if updated or false if not updated
+     * @deprecated our CSTR class uses a mol balance but maintained for other applications
      * @author Ogechi
      * @author Dylan
      */
@@ -178,7 +181,6 @@ public class Reaction implements Cloneable{
         Reaction specificComparator = (Reaction)comparator;
         if (specificComparator.reactants.length != this.reactants.length) return false;
         if (specificComparator.products.length != this.products.length) return false;
-        if (!(specificComparator.limitingReactant.equals(this.limitingReactant))) return false;
         if (specificComparator.k != this.k) return false;
         for (int i =0; i < this.reactants.length; i++) {
             if (!(specificComparator.reactants[i].equals(this.reactants[i]))) return false;
@@ -193,6 +195,7 @@ public class Reaction implements Cloneable{
      *
      * @param concentrations concentrations array
      * @throws IllegalArgumentException reactants and products must not be null
+     * @deprecated our CSTR class uses a mol balance but maintained for other applications
      * @author Ogechi
      */
     private void calculateLimitingReactant(double[] concentrations) throws IllegalArgumentException {
