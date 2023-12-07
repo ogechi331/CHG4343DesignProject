@@ -196,7 +196,7 @@ public class PIDController implements Cloneable{
      * @author Dylan
      */
     public boolean setEndTime(double endTime) {
-        if (this.startTime < endTime) return false;
+        if (this.startTime > endTime) return false;
         this.endTime= endTime;
         this.numberOfSteps = (int)Math.ceil((this.endTime-this.startTime)/this.timeStep)+1;
         return true;
