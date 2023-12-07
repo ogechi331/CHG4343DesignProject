@@ -12,14 +12,15 @@ public class TestingDriver {
      */
     public static void main(String args[]) {
 
-        //Comment and uncomment to test
-        //uncomment next line to test reactor and CSTR reactor classes
+        //Comment and un-comment to test
+
+        //un-comment next line to test reactor and CSTR reactor classes
         //testReactorClass();
-        //uncomment next line to test reaction class
+        //un-comment next line to test reaction class
         //testReaction();
-        //uncomment next line to test species class
+        //un-comment next line to test species class
         //testSpecies();
-        //uncomment next line to test the PID controller class
+        //un-comment next line to test the PID controller class
         //testPIDController();
 
 
@@ -55,9 +56,19 @@ public class TestingDriver {
             CSTR.setVolume(2);
             System.out.println(CSTR.getVolume());
 
+            System.out.println("Invalid volume 2->-1 test");
+            System.out.println(CSTR.getVolume());
+            CSTR.setVolume(-1);
+            System.out.println(CSTR.getVolume());
+
             System.out.println("Initial flow 0.05->0.1 test");
             System.out.println(CSTR.getVolume());
             CSTR.setInitialFlow(0.1);
+            System.out.println(CSTR.getInitialFlow());
+
+            System.out.println("Invalid initial flow 0.1->-1 test");
+            System.out.println(CSTR.getVolume());
+            CSTR.setInitialFlow(-1);
             System.out.println(CSTR.getInitialFlow());
 
             double[] initialConcentrations_2 = {0.08, 0.32};
@@ -70,12 +81,50 @@ public class TestingDriver {
             System.out.println(out[0]);
             System.out.println(out[1]);
 
+            double[] initialConcentrations_B = {-0.08, 0.32};
+            System.out.println("Invalid initial concentrations 0.08, 0.32->-0.08, 0.32 test");
+            out = CSTR.getInitialConcentrations();
+            System.out.println(out[0]);
+            System.out.println(out[1]);
+            CSTR.setInitialConcentrations(initialConcentrations_B);
+            out = CSTR.getInitialConcentrations();
+            System.out.println(out[0]);
+            System.out.println(out[1]);
+
+            System.out.println("Invalid initial concentrations 0.08, 0.32->null test");
+            out = CSTR.getInitialConcentrations();
+            System.out.println(out[0]);
+            System.out.println(out[1]);
+            CSTR.setInitialConcentrations(null);
+            out = CSTR.getInitialConcentrations();
+            System.out.println(out[0]);
+            System.out.println(out[1]);
+
             double[] inletConcentrations_2 = {2.4, 0};
             System.out.println("Inlet concentrations 1.2, 0->2.4, 0 test");
             out = CSTR.getInletConcentrations();
             System.out.println(out[0]);
             System.out.println(out[1]);
             CSTR.setInletConcentrations(inletConcentrations_2);
+            out = CSTR.getInletConcentrations();
+            System.out.println(out[0]);
+            System.out.println(out[1]);
+
+            double[] inletConcentrations_B = {-2.4, 0};
+            System.out.println("Invalid inlet concentrations 2.4, 0->-2.4, 0 test");
+            out = CSTR.getInletConcentrations();
+            System.out.println(out[0]);
+            System.out.println(out[1]);
+            CSTR.setInletConcentrations(inletConcentrations_B);
+            out = CSTR.getInletConcentrations();
+            System.out.println(out[0]);
+            System.out.println(out[1]);
+
+            System.out.println("Invalid inlet concentrations 2.4, 0->null test");
+            out = CSTR.getInletConcentrations();
+            System.out.println(out[0]);
+            System.out.println(out[1]);
+            CSTR.setInletConcentrations(null);
             out = CSTR.getInletConcentrations();
             System.out.println(out[0]);
             System.out.println(out[1]);
@@ -95,44 +144,44 @@ public class TestingDriver {
             CSTR.setCurrentSpeciesNumber(1);
             System.out.println(CSTR.getCurrentSpeciesNumber());
 
-            System.out.println("Test of invalid volume");
+            System.out.println("Test of constructor, invalid volume");
             try {
                 CSTRReactor CSTR_2 = new CSTRReactor(-1, initialFlow, reaction, initialConcentrations, inletConcentrations, controlled, isControlled);
             } catch (Exception e) {
                 System.out.println(e.getMessage());
             }
-            System.out.println("Test of invalid inital flow");
+            System.out.println("Test of constructor, invalid inital flow");
             try {
                 CSTRReactor CSTR_2 = new CSTRReactor(volume, -0.5, reaction, initialConcentrations, inletConcentrations, controlled, isControlled);
             } catch (Exception e) {
                 System.out.println(e.getMessage());
             }
-            System.out.println("Test of invalid reaction");
+            System.out.println("Test of constructor, invalid reaction");
             try {
                 CSTRReactor CSTR_2 = new CSTRReactor(volume, initialFlow, null, initialConcentrations, inletConcentrations, controlled, isControlled);
             } catch (Exception e) {
                 System.out.println(e.getMessage());
             }
-            System.out.println("Test of invalid initalConcentrations for null array");
+            System.out.println("Test of constructor, invalid initalConcentrations for null array");
             try {
                 CSTRReactor CSTR_2 = new CSTRReactor(volume, initialFlow, reaction, null, inletConcentrations, controlled, isControlled);
             } catch (Exception e) {
                 System.out.println(e.getMessage());
             }
-            System.out.println("Test of invalid initalConcentrations for negative concentration array");
+            System.out.println("Test of constructor, invalid initalConcentrations for negative concentration array");
             try {
                 double[] initialConcentrations_3 = {-0.04, 0.16};
                 CSTRReactor CSTR_2 = new CSTRReactor(volume, initialFlow, reaction, initialConcentrations_3, inletConcentrations, controlled, isControlled);
             } catch (Exception e) {
                 System.out.println(e.getMessage());
             }
-            System.out.println("Test of invalid inletConcentations for null array");
+            System.out.println("Test of constructor, invalid inletConcentations for null array");
             try {
                 CSTRReactor CSTR_2 = new CSTRReactor(volume, initialFlow, reaction, initialConcentrations, null, controlled, isControlled);
             } catch (Exception e) {
                 System.out.println(e.getMessage());
             }
-            System.out.println("Test of invalid inletConcentations for negative concentration array");
+            System.out.println("Test of constructor, invalid inletConcentations for negative concentration array");
             try {
                 double[] inletConcentrations_3 = {-1.2, 0};
                 CSTRReactor CSTR_2 = new CSTRReactor(volume, initialFlow, reaction, initialConcentrations, inletConcentrations_3, controlled, isControlled);
@@ -209,12 +258,49 @@ public class TestingDriver {
         output = reaction.getReactants();
         System.out.println(output[0].getName());
 
+        System.out.println("Invalid reactants A to null test");
+        output = reaction.getReactants();
+        System.out.println(output[0].getName());
+        Species[] reactants_B = new Species[1];
+        reactants_B = null;
+        reaction.setReactants(reactants);
+        output = reaction.getReactants();
+        System.out.println(output[0].getName());
+
+        System.out.println("Invalid reactants A to {null} test");
+        output = reaction.getReactants();
+        System.out.println(output[0].getName());
+        Species[] reactants_C = new Species[1];
+        reactants_C[0] = null;
+        reaction.setReactants(reactants);
+        output = reaction.getReactants();
+        System.out.println(output[0].getName());
+
+
         System.out.println("Products B to C test");
         output = reaction.getProducts();
         System.out.println(output[0].getName());
         Species[] products = new Species[1];
         products[0] = C;
-        reaction.setProducts(reactants);
+        reaction.setProducts(products);
+        output = reaction.getProducts();
+        System.out.println(output[0].getName());
+
+        System.out.println("Invalid products B to null test");
+        output = reaction.getProducts();
+        System.out.println(output[0].getName());
+        Species[] products_B = new Species[1];
+        products_B = null;
+        reaction.setProducts(products_B);
+        output = reaction.getProducts();
+        System.out.println(output[0].getName());
+
+        System.out.println("Invalid products B to {null} test");
+        output = reaction.getProducts();
+        System.out.println(output[0].getName());
+        Species[] products_C = new Species[1];
+        products_C[0] = null;
+        reaction.setProducts(products_C);
         output = reaction.getProducts();
         System.out.println(output[0].getName());
 
@@ -268,6 +354,12 @@ public class TestingDriver {
         A.setCoefficient(2);
         System.out.println(A.getCoefficient());
 
+        try {
+            Species D = new Species(null);
+        } catch (IllegalArgumentException e) {
+            System.out.println(e.getMessage());
+        }
+
         //other methods are tested whenever the controller is used
 
     } //end of species checks
@@ -313,7 +405,7 @@ public class TestingDriver {
 
         //valid controller test
 
-        try { //unchecked exception so this is needed
+        try { //checked exception so this is needed
 
             PIDController PID = new PIDController(startTime, endTime, timeStep, controllerGain, integratingTimeConstant, derivativeTimeConstant, controllerType, deadTime, controllable, tolerance, disturbances, setPoint);
 
