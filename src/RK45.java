@@ -7,7 +7,7 @@
  */
 public class RK45 {
 
-    //IMPORTANT: these static instance variables should not have getters and setters as they are helper variables, and could mess with calculations
+    //IMPORTANT: these static instance variables and should not have getters and setters as they are helper variables, and could mess with calculations
     private static double[] k1;
     private static double[] k2;
     private static double[] k3;
@@ -146,7 +146,13 @@ public class RK45 {
 
     }
 
-    // Helper method to add two arrays element-wise
+    /** Helper method to add two arrays element-wise
+     *
+     * @param a first array to add
+     * @param b second array to add
+     * @return arrays added together element by element
+     * @author Ogechi
+     */
     private static double[] addArrays(double[] a, double[] b) {
         int n = a.length;
         double[] result = new double[n];
@@ -156,7 +162,13 @@ public class RK45 {
         return result;
     }
 
-    // Helper method to multiply an array by a scalar
+    /** Helper method to multiply an array by a scalar
+     *
+     * @param a array to scale
+     * @param scalar scalar to apply to array
+     * @return scaled array
+     * @author Ogechi
+     */
     private static double[] multiplyArray(double[] a, double scalar) {
         int n = a.length;
         double[] result = new double[n];

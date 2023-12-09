@@ -1,5 +1,3 @@
-//IMPORTANT: currentConcentrations may seem redundant because of inletConcentrations but both are actually needed.
-
 /** Abstract parent class for reactor types
  * @author Alex
  * @author Dylan
@@ -14,6 +12,7 @@ public abstract class Reactor implements Controllable, DifferentialEquation, Clo
     private double[] initialConcentrations; //initial concentrations in the reactor
 
     private double[] currentConcentrations; //current concentrations in the reactor
+    // currentConcentrations may seem redundant because of inletConcentrations but both are actually needed.
 
     private double initialFlow; //initial flow rate
 

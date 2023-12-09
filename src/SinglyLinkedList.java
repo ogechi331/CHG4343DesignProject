@@ -291,7 +291,12 @@ public class SinglyLinkedList <E> {
         this.size = source.size;
     }
 
-    //TODO: test equals method
+    /** Equals method for singlylinkedlist
+     *
+     * @param comparator singlylinkedlist to compare
+     * @return true if equal, false if not
+     * @author Ogechi
+     */
     @Override
     public boolean equals(Object comparator) {
         try {

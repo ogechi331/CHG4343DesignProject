@@ -177,7 +177,12 @@ public class CSTRReactor extends Reactor {
     public double getDisturbedVar(){
         return super.getInitialConcentrations()[super.getControlled()];
     }
-
+    /**
+     * Returns the current value of the variable set to be manipulated by the PIDController.
+     *
+     * @return the current value of the manipulated variable.
+     * @author Ogechi
+     */
     @Override
     public double getManipulatedVar() {
         return super.getInitialFlow();
