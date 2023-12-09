@@ -101,7 +101,7 @@ public class PIDController implements Cloneable{
         this.g_processVariable=source.g_processVariable;
         this.setPoint=source.setPoint;
         this.g_output=source.g_output;
-        this.disturbances = source.disturbances.clone(); //TODO test clone method
+        this.disturbances = source.disturbances.clone();
         this.g_previousTime=source.g_previousTime;
         this.controllable=source.controllable;
     }
@@ -382,7 +382,7 @@ public class PIDController implements Cloneable{
         if (specificComparator.setPoint!=this.setPoint) return false;
         if (specificComparator.g_output!=this.g_output) return false;
         if (specificComparator.g_previousTime!=this.g_previousTime) return false;
-        return (disturbances.equals(((PIDController) comparator).disturbances)); //TODO check Queue equals method
+        return (disturbances.equals(((PIDController) comparator).disturbances));
 
     }
 
